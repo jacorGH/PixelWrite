@@ -1,0 +1,16 @@
+{
+  "name": "Pixelwright",
+  "short_name": "Pixelwright",
+  "description": "Build pixel-art 3D worlds and play them: a game maker in your pocket.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#125caa",
+  "theme_color": "#125caa",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
