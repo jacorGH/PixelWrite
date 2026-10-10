@@ -1,5 +1,5 @@
 // Pixelwright offline support: the app, its icons and the 3D library are kept so it opens without a connection.
-const CACHE = 'pixelwright-v1';
+const CACHE = 'pixelwright-v2';
 const LOCAL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 const THREE_JS = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 self.addEventListener('install', e => {
