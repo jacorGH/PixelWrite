@@ -1133,6 +1133,7 @@ const VEX_QUESTS = {
     steps: [{ type: 'kill', creature: 'lich', count: 1, hint: 'Defeat the Drowned Lich in the Sunken Crypt.' }],
     done: ['Ha! I knew it.', 'The best thing I have ever made. It is yours.'], reward: { items: [['crystalsword', 1], ['bronzeplate', 1]], xp: [['attack', 2000], ['strength', 2000]], spells: [] } }
 };
+const XP_RATE_DEFAULTS = { attack: 2, strength: 2, defence: 2, hitpoints: 1.5, ranged: 2, magic: 1.25, prayer: 1.5, swimming: .3, firemaking: .6, woodcutting: .7, cooking: .75 };
 const SKILL_DEFAULTS = { alchemy: { name: 'Alchemy', desc: 'Brewing draughts from herbs.' } };
 const MECH_ITEMS = {
   herb: { name: 'Wild herb', desc: 'Bitter leaves that smell of rain.', icon: 'icon_herb', kind: 'material', stack: true, value: 8 },
@@ -1543,6 +1544,8 @@ function normalizeDoc(d){
     d.skills = isO(d.skills) ? d.skills : {};
     const BASE = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic', 'prayer', 'crafting', 'mining', 'smithing', 'fishing', 'cooking', 'woodcutting', 'firemaking', 'farming', 'swimming'];
     for (const [id, sk] of Object.entries(d.skills)){ if (!isO(sk) || BASE.includes(id) || !/^[a-z0-9_]+$/.test(id)){ delete d.skills[id]; continue; } d.skills[id] = { name: String(sk.name || id), desc: String(sk.desc || '') }; }
+    if (!isO(d.xpRates)) d.xpRates = clone(XP_RATE_DEFAULTS); // older worlds get the rebalance once
+    for (const [k, v] of Object.entries(d.xpRates)) if (!/^[a-z0-9_]+$/.test(k) || !isFinite(+v)) delete d.xpRates[k]; else d.xpRates[k] = clampN(v, .05, 10, 1);
     d.rules = (Array.isArray(d.rules) ? d.rules : []).filter(isO).map((r, k) => ({ id: String(r.id || 'rule' + k), name: String(r.name || 'Rule ' + (k + 1)), on: ['use', 'tap', 'enter', 'kill', 'level', 'gather', 'make', 'start'].includes(r.on) ? r.on : 'use', target: String(r.target || ''), label: String(r.label || ''), fail: String(r.fail || ''), once: !!r.once, conds: list(r.conds), actions: list(r.actions) }));
     d.dialogues = isO(d.dialogues) ? d.dialogues : {};
     for (const [id, dl] of Object.entries(d.dialogues)){
@@ -3301,6 +3304,12 @@ const A = {
   'qs-edit': b => { S.questEdit = S.questEdit === b.dataset.id ? null : b.dataset.id; renderSheet(); },
   'sh-edit': b => { S.shopEdit = S.shopEdit === b.dataset.id ? null : b.dataset.id; renderSheet(); },
   'g-numtext': async b => { const o = pathGet(b.dataset.path), k = b.dataset.k; if (!o) return; const v = await dialog({ title: 'Number', input: String(o[k] ?? 0), okLabel: 'Set' }); if (v == null || !isFinite(+v)) return; o[k] = +v; commit(); renderSheet(); },
+  'xp-rate': b => { const k = b.dataset.k, cur = xpRate(k), d = +b.dataset.d, steps = [.05, .1, .2, .25, .3, .4, .5, .6, .7, .75, .8, .9, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5, 7.5, 10];
+    let i = steps.findIndex(x => x >= cur - 1e-6); if (i < 0) i = steps.length;
+    i = steps[i] !== undefined && Math.abs(steps[i] - cur) < 1e-6 ? i + d : d > 0 ? i : i - 1; i = Math.max(0, Math.min(steps.length - 1, i));
+    doc.xpRates[k] = steps[i]; commit(); renderSheet(); },
+  'xp-reset': () => { doc.xpRates = clone(XP_RATE_DEFAULTS); commit(); renderSheet(); toast('Skill rates set to the recommended balance.'); },
+  'xp-flat': () => { doc.xpRates = {}; commit(); renderSheet(); toast('Every skill earns experience at ×1.'); },
   'sk-new': async () => {
     const name = await dialog({ title: 'Name the new skill', input: 'Alchemy', okLabel: 'Create' }); if (!name) return;
     let id = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'skill'; while (doc.skills[id] || SKILLS.some(x => x[0] === id)) id += '2';
@@ -4006,7 +4015,10 @@ function mechList(path, T, addLabel, kind){
 const condList = (path, label = 'Add a condition…') => mechList(path, CT, label, 'cond');
 const actList = (path, label = 'Add an action…') => mechList(path, AT, label, 'act');
 function skillsSection(){
-  return `<div class="row"><button class="btn primary" data-act="sk-new">New skill</button><span class="muted">New skills level from 1 to 99 like the rest. Train them with recipes (Trains), resources, rules (Give XP) and quest rewards, and check them in conditions.</span></div>
+  const rates = SKILLS.map(([k, nm]) => stepper(nm, '×' + fmt(xpRate(k)), `data-act="xp-rate" data-k="${k}"`)).join('');
+  return `<h3 class="sec">How fast skills level</h3><p class="muted">Each skill's experience is multiplied by its rate: ×2 levels twice as fast, ×0.5 half as fast. Quest and rule rewards are given exactly as you set them.</p>
+  <div class="stps">${rates}</div><div class="row"><button class="btn sm" data-act="xp-reset">Reset to recommended</button><button class="btn sm" data-act="xp-flat">Set all to ×1</button></div>
+  <h3 class="sec">Your skills</h3><div class="row"><button class="btn primary" data-act="sk-new">New skill</button><span class="muted">New skills level from 1 to 99 like the rest. Train them with recipes (Trains), resources, rules (Give XP) and quest rewards, and check them in conditions.</span></div>
   <ul class="pflist">${Object.entries(doc.skills).map(([id, sk]) => { const p = 'skills.' + id; return `<li style="flex-wrap:wrap"><div class="meta"><b>${esc(sk.name)}</b><span class="muted">${esc(sk.desc || 'Your skill')}</span></div><div class="btns">${gText(p, 'name', 'Rename')}${gText(p, 'desc', 'Describe')}<button class="btn sm danger" data-act="g-del" data-path="skills" data-k="${esc(id)}" data-what="${esc(sk.name)}">Delete</button></div></li>`; }).join('') || '<li class="muted">No custom skills yet.</li>'}</ul>
   <p class="muted">Built in: ${SKILLS.slice(0, BASE_SKILLS_N).map(([, n]) => n).join(', ')}.</p>`;
 }
@@ -6094,7 +6106,7 @@ function runActions(as){
       case 'say': if (a.text) toast(a.text); break;
       case 'give': if (ITEMS[a.id] && n > 0){ if (!addItem(a.id, n)) dropGround(a.id, P.pos, n, 300); } break;
       case 'take': removeItems(a.id, Math.min(n || 1, countItem(a.id))); break;
-      case 'xp': if (a.id in G.xp) gainXp(a.id, n); break;
+      case 'xp': if (a.id in G.xp) gainXp(a.id, n, true); break;
       case 'flag': if (a.id) G.flags[a.id] = true; break;
       case 'unflag': delete G.flags[a.id]; break;
       case 'var': { const v = +G.vars[a.id] || 0; G.vars[a.id] = a.op === '-' ? v - n : a.op === '=' ? n : v + n; break; }
@@ -6203,7 +6215,7 @@ function completeQuest(qid, fin){
   const rw = fin ? fin.reward : q.reward, got = [];
   if (fin && fin.flag) G.flags[fin.flag] = true;
   rw.items.forEach(([id, n]) => { if (!ITEMS[id]) return; if (!addItem(id, n)) dropGround(id, P.pos, n, 300); got.push((n > 1 ? n + ' ' : '') + itemName(id).toLowerCase()); });
-  rw.xp.forEach(([sk, n]) => { if (sk in G.xp){ gainXp(sk, n); got.push(`${n} ${skillName(sk)} XP`); } });
+  rw.xp.forEach(([sk, n]) => { if (sk in G.xp){ gainXp(sk, n, true); got.push(`${n} ${skillName(sk)} XP`); } });
   (rw.spells || []).forEach(sid => { if (learnSpell(sid)) got.push(`the spell ${doc.spells[sid].name}`); });
   saveGame(); toast(`Quest complete: ${q.name}!`); sfx('quest');
   return `Quest complete!${got.length ? ' You receive ' + got.join(', ') + '.' : ''}`;
@@ -6360,8 +6372,10 @@ function stopTask(msg){
   if (msg) toast(msg);
   if (S.tool === 'walk') renderSheet();
 }
-function gainXp(skill, n){
+const xpRate = k => (doc.xpRates && doc.xpRates[k]) || 1;
+function gainXp(skill, n, exact){
   if (!(skill in G.xp)) return;
+  if (!exact && n > 0) n = Math.max(1, Math.round(n * xpRate(skill))); // earned XP follows the skill's rate; hand-set rewards are exact
   const before = levelOf(G.xp[skill]); G.xp[skill] += n; const after = levelOf(G.xp[skill]);
   if (after <= before) return;
   if (skill === 'hitpoints') G.hp += after - before;
