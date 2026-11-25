@@ -340,6 +340,7 @@ textarea{width:100%;flex:1;min-height:42vh;resize:vertical;font:12px/1.35 ui-mon
       <li>Things you drop stay on the ground for a few minutes, even if you leave and come back. Days and nights pass while you play; the sun button in the top bar holds it at day or night instead.</li>
       <li><b>Chests, barrels and crates</b> hold your things: tap one to open it, then tap items to move them in and out. Any piece can be made a container from its In Play setting.</li>
       <li><b>Things (Create → Game → Things)</b>: invent anything from building blocks: Carry, Use, Body, Grows, Produces, Light, Aura, Storage, Station and On tap. Glowberry bushes in the village and the healing spring east of it are examples; plant glowberry seeds on tilled soil.</li>
+      <li><b>Safety and contact</b>: chat is filtered unless you switch the filter off. Mute or report any player from the player list or by tapping them; reports go to the developer at <a href="mailto:jacoblc22@gmail.com">jacoblc22@gmail.com</a>, who reviews them within 24 hours. Hosts can remove players.</li>
       <li><b>Play together (Play → Map)</b>: host your world and friends join with a code or an invite link; see each other, chat, give items, and share falling trees and campfires. Join someone else's world with their code.</li>
       <li><b>Make any mechanic (Create → Game)</b>: <b>Skills</b> adds new skills that level like the rest. <b>Talk</b> builds branching conversations for people (or signs and objects), with choices that check conditions and run actions. <b>Rules</b> make things happen: when an item is used, an object is tapped, an area is entered, a creature dies, a skill levels, something is gathered or made, or a new game starts, check conditions (items, flags, numbers, skill levels, quests, area, night, chance) and run actions (give or take items, XP, flags, numbers, heal, hurt, teleport, start quests, teach spells, open a conversation, summon creatures, play a sound). Old Tom's chat, Alchemy and healing draughts are examples.</li>
       <li><b>Stacking and the bank</b>: materials, food, bones, logs, ores and buckets stack in one slot. Use Sort and Arrange under your bag to tidy it. The bank booth on the village path stores unlimited stacks; the altar east of the village restores prayer.</li>
@@ -1687,10 +1688,10 @@ try {
   const s = localStorage.getItem(KEY);
   doc = JOIN ? (s ? normalizeDoc(JSON.parse(s)) : demoDoc()) : GAME && GAME.doc ? normalizeDoc(JSON.parse(JSON.stringify(GAME.doc))) : s ? normalizeDoc(JSON.parse(s)) : demoDoc();
 } catch (e){ doc = demoDoc(); }
-try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (typeof p.grid === 'boolean') S.grid = p.grid; if (typeof p.shells === 'boolean') S.shells = p.shells; if ([1, 2, 3, 4].includes(p.pxScale)) S.pxScale = p.pxScale; S.startPlay = p.mode === 'play'; if (['cycle', 'day', 'night'].includes(p.day)) S.dayMode = p.day; if (typeof p.music === 'boolean') S.music = p.music; if (typeof p.sfx === 'boolean') S.sfx = p.sfx; S.worldOffered = !!p.worldOffered; if (typeof p.shadows === 'boolean') S.shadows = p.shadows; if (typeof p.weather === 'boolean') S.weather = p.weather; if (typeof p.netName === 'string') S.netName = p.netName.slice(0, 20); if (typeof p.hostCode === 'string' && /^[A-Z0-9]{6}$/.test(p.hostCode)) S.hostCode = p.hostCode; S.hideChat = !!p.hideChat; } catch (e){}
+try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (typeof p.grid === 'boolean') S.grid = p.grid; if (typeof p.shells === 'boolean') S.shells = p.shells; if ([1, 2, 3, 4].includes(p.pxScale)) S.pxScale = p.pxScale; S.startPlay = p.mode === 'play'; if (['cycle', 'day', 'night'].includes(p.day)) S.dayMode = p.day; if (typeof p.music === 'boolean') S.music = p.music; if (typeof p.sfx === 'boolean') S.sfx = p.sfx; S.worldOffered = !!p.worldOffered; if (typeof p.shadows === 'boolean') S.shadows = p.shadows; if (typeof p.weather === 'boolean') S.weather = p.weather; if (typeof p.netName === 'string') S.netName = p.netName.slice(0, 20); if (typeof p.hostCode === 'string' && /^[A-Z0-9]{6}$/.test(p.hostCode)) S.hostCode = p.hostCode; S.hideChat = !!p.hideChat; if (p.chatFilter === false) S.chatFilter = false; S.netRules = !!p.netRules; } catch (e){}
 if (GAME){ S.startPlay = true; S.worldOffered = true; document.documentElement.classList.add('player'); document.title = GAME.title || 'Pixelwright'; }
 if (JOIN){ S.startPlay = true; S.worldOffered = true; document.documentElement.classList.add('player'); document.title = 'Joining ' + JOIN + ' · Pixelwright'; }
-const savePrefs = () => { try { localStorage.setItem(PKEY, JSON.stringify({ grid: S.grid, shells: S.shells, pxScale: S.pxScale, mode: S.mode, day: S.dayMode, music: S.music, sfx: S.sfx, worldOffered: S.worldOffered, shadows: S.shadows, weather: S.weather, netName: S.netName, hostCode: S.hostCode, hideChat: S.hideChat })); } catch (e){} };
+const savePrefs = () => { try { localStorage.setItem(PKEY, JSON.stringify({ grid: S.grid, shells: S.shells, pxScale: S.pxScale, mode: S.mode, day: S.dayMode, music: S.music, sfx: S.sfx, worldOffered: S.worldOffered, shadows: S.shadows, weather: S.weather, netName: S.netName, hostCode: S.hostCode, hideChat: S.hideChat, chatFilter: S.chatFilter !== false, netRules: !!S.netRules })); } catch (e){} };
 
 let hist = [JSON.stringify(doc)], hi = 0, saveT = 0;
 function save(){ clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, hist[hi]); } catch (e){} }, 300); }
@@ -2517,7 +2518,7 @@ const GUIDE = [
   { id: 'together', title: 'Play together', blurb: 'Host your world, or join a friend’s', play: true,
     intro: 'One person hosts their world and up to 7 friends join from their own phones. Everyone walks around the same world together.',
     steps: ['In Play, open <b>Map</b> and scroll to <b>Play together</b>. Set your name.', 'The host taps <b>Host this world</b> and gets a 6-letter code. <b>Invite</b> shares the code (and a link, on the web).', 'Friends tap <b>Join a world</b> and type the code, or open the link.', 'You see each other with name tags and chat bubbles. Tap a player to give them something, mute them, or (if you’re the host) remove them.', 'Trees and rocks gathered by anyone fall for everyone, and campfires are shared. Creatures, crops and chests are still each player’s own.', 'Each guest keeps separate skills and a bag for every world they visit. After editing, the host taps <b>Send world update</b>.'],
-    tip: 'The world stays open only while the host’s app is open. When the host leaves, everyone returns to the join screen.' },
+    tip: 'The world stays open only while the host’s app is open. When the host leaves, everyone returns to the join screen. Chat is filtered, and you can mute or report anyone: reports go to jacoblc22@gmail.com.' },
   { id: 'share', title: 'Test and share', blurb: 'Play-testing, exporting and GitHub Pages',
     intro: 'When it is ready, turn your world into a game anyone can play.',
     steps: ['Tap <b>Play</b> to test. Map → <b>New game</b> starts fresh with your starting kit, at the Player start piece.', 'Game → World → <b>Export playable game</b> saves one HTML file with a title screen and no editing tools. Players’ progress saves on their own device.', '<b>Back up world</b> saves your work to a file; <b>Load world file</b> brings a backup (or an exported game) back.', 'To put it online, upload the file to a GitHub repository as index.html and turn on GitHub Pages in the repository’s settings.'],
@@ -3382,6 +3383,7 @@ const A = {
   'net-leave': () => { location.href = location.pathname; },
   'net-name': async () => { if (await askName()){ netSendPos(); renderSheet(); } },
   'net-join': async () => {
+    if (!await agreeRules()) return;
     const v = await dialog({ title: 'Join a world', msg: 'Type the code your friend sees under “Hosting this world”.', input: '', okLabel: 'Join', max: 8 }); if (v == null) return;
     const code = v.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4){ toast('That code looks too short.'); return; }
     location.href = location.pathname + '?join=' + code;
@@ -3407,6 +3409,17 @@ const A = {
     S.chatDraft = ''; if (ci){ ci.value = ''; ci.focus(); }
   },
   'chat-hide': () => { S.hideChat = !S.hideChat; savePrefs(); renderSheet(); },
+  'chat-filter': () => { S.chatFilter = S.chatFilter === false; savePrefs(); renderSheet(); toast(S.chatFilter ? 'Chat filter on.' : 'Chat filter off. Unfiltered messages may be offensive.'); },
+  'net-report': async b => {
+    const pl = NET.players.get(b.dataset.id); if (!pl) return;
+    const why = await dialog({ title: `Report ${cleanText(pl.name)}`, msg: 'What happened? Your report is sent by email to the developer, with this player’s recent messages. They’ll also be muted for you.', input: '', okLabel: 'Send report', max: 300 });
+    if (why == null) return;
+    pl.muted = true; pl.until = 0;
+    const said = NET.chat.filter(e => e.id === pl.id).slice(-15).map(e => '- ' + e.text).join('\n') || '(no messages)';
+    const body = `Reported player: ${pl.name}\nWorld code: ${NET.code} (${NET.role === 'host' ? 'I am the host' : 'host: ' + NET.hostName})\nReported by: ${myName()}\nTime: ${new Date().toISOString()}\n\nWhat happened:\n${why || '(not given)'}\n\nTheir recent messages:\n${said}`;
+    const a = document.createElement('a'); a.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Pixelwright player report: ' + pl.name)}&body=${encodeURIComponent(body)}`; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+    toast(`${cleanText(pl.name)} is muted. Finish sending the email to file your report.`); renderSheet();
+  },
   'xp-reset': () => { doc.xpRates = clone(XP_RATE_DEFAULTS); commit(); renderSheet(); toast('Skill rates set to the recommended balance.'); },
   'xp-flat': () => { doc.xpRates = {}; commit(); renderSheet(); toast('Every skill earns experience at ×1.'); },
   'g-bool': b => { const o = pathGet(b.dataset.path); if (!o) return; o[b.dataset.k] = !o[b.dataset.k]; commit(); renderSheet(); },
@@ -5726,9 +5739,10 @@ function interactions(h){
   }
   if (h.ud.remote){
     const pl = NET.players.get(h.ud.remote); if (!pl) return { opts: [] };
-    const opts = [{ label: `Give ${pl.name} something`, menu: true, now: () => A['net-give']({ dataset: { id: pl.id } }) }, { label: pl.muted ? 'Unmute' : 'Mute', menu: true, now: () => A['net-mute']({ dataset: { id: pl.id } }) }];
+    const plName = cleanText(pl.name);
+    const opts = [{ label: `Give ${pl.name} something`, menu: true, now: () => A['net-give']({ dataset: { id: pl.id } }) }, { label: pl.muted ? 'Unmute' : 'Mute', menu: true, now: () => A['net-mute']({ dataset: { id: pl.id } }) }, { label: 'Report', menu: true, now: () => A['net-report']({ dataset: { id: pl.id } }) }];
     if (NET.role === 'host') opts.push({ label: 'Remove from the world', menu: true, now: () => A['net-kick']({ dataset: { id: pl.id } }) });
-    return { opts, title: pl.name, tp: pl.obj.position.clone() };
+    return { opts, title: plName, tp: pl.obj.position.clone() };
   }
   if (h.ud.npc){ const n = h.ud.npc, sh = n.def.shop && doc.shops[n.def.shop]; const opts = [{ id: 'talk', label: `Talk to ${n.def.name}` }]; if (sh) opts.push({ id: 'trade', label: 'Trade' }); return { opts, title: n.def.name, tp: n.pos.clone(), extra: { npc: n } }; }
   if (h.ud.mob){ const m = h.ud.mob; if (m.dead) return { opts: [] }; return { opts: [{ id: 'attack', label: `Attack ${m.def.name} (level ${mobLevel(m.def)})` }], title: m.def.name, tp: m.pos.clone(), extra: { mob: m } }; }
@@ -6414,6 +6428,22 @@ function openDialogue(did, n){
 // Star network over WebRTC (PeerJS): guests talk only to the host, and the host passes messages on.
 // The host sends the world; everyone sends where they are; chat, gifts, falling trees and fires are shared.
 var NET = { role: '', peer: null, conns: new Map(), host: null, code: '', hostName: '', players: new Map(), chat: [], sendT: 0, wasMoving: false, status: '', got: false, me: { said: '', until: 0, tag: null } };
+const SUPPORT_EMAIL = 'jacoblc22@gmail.com';
+// chat filter: whole words, and word stems that catch their variants; matched after undoing common letter swaps (sh1t, @ss)
+const FILTER = (() => { const dec = b => atob(b).split(','); return { stems: dec('ZnVjayxzaGl0LGJpdGNoLGN1bnQsbmlnZyxmYWdnLG1vdGhlcmYsYmFzdGFyZCx3aG9yZSxzbHV0LHJldGFyZCxkaWNraGVhZCxhc3Nob2xlLHdhbmssYm9sbG9jayxwdXNzeSxwb3JuLHJhcGlzdCxreXMsa2lsbHlvdXJzZWxmLHRyYW5ueSxraWtlLHdldGJhY2ssZHlrZQ=='), words: new Set(dec('YXNzLGFyc2UsZGljayxjb2NrLHR3YXQsZmFnLG5hemkscmFwZSxyYXBpbmcsY3VtLHRpdHMsYm9vYixib29icyxwaXNzLGppenoscGVuaXMsdmFnaW5hLGRpbGRvLG51ZGUsbnVkZXMsc2V4LHNleHksaG9lLHRob3QsY29vbixnb29rLHBha2ksc3BpYyxjaGluaw==')) }; })();
+function cleanText(t){
+  t = String(t || ''); if (S.chatFilter === false) return t;
+  const out = t.split(''), low = t.toLowerCase();
+  // read it twice: once with @ as "a", once with @ and * as "u" (f@ck, f*ck), and mask anything either reading catches
+  for (const swap of [{ '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i' }, { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'u', '*': 'u', '$': 's', '!': 'i' }]){
+    const norm = low.replace(/[013457@$!*]/g, c => swap[c] || c), re = /[a-z]+/g;
+    let m; while ((m = re.exec(norm))){
+      const w = m[0], hit = FILTER.words.has(w) || FILTER.stems.some(st => w.startsWith(st));
+      if (hit) for (let k = m.index + 1; k < m.index + w.length; k++) out[k] = '*';
+    }
+  }
+  return out.join('');
+}
 const NET_PREFIX = 'pixelwright-', PEER_SRC = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', NET_MAX = 8;
 const SHIRTS = ['cloth', 'dress', 'robe', 'apron', 'trollskin', 'chitin', 'fur'];
 function loadPeer(){
@@ -6422,7 +6452,7 @@ function loadPeer(){
 }
 function newCode(){ const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c = ''; for (let k = 0; k < 6; k++) c += A[Math.floor(Math.random() * A.length)]; return c; }
 const myName = () => (S.netName || 'Adventurer').slice(0, 20);
-async function askName(){ const v = await dialog({ title: 'Your name', msg: 'Other players see it above your head.', input: S.netName || '', okLabel: 'Save', max: 20 }); if (v == null) return false; S.netName = v.trim().slice(0, 20) || 'Adventurer'; savePrefs(); return true; }
+async function askName(){ const v = await dialog({ title: 'Your name', msg: 'Other players see it above your head.', input: S.netName || '', okLabel: 'Save', max: 20 }); if (v == null) return false; S.netName = v.trim().slice(0, 20) || 'Adventurer'; if (cleanText(S.netName) !== S.netName && S.chatFilter !== false){ toast('Please pick a different name.'); S.netName = 'Adventurer'; } savePrefs(); return true; }
 function netSend(m){
   if (NET.role === 'host') NET.conns.forEach(c => { if (c.open !== false) c.send(m); });
   else if (NET.role === 'guest' && NET.host) NET.host.send(m);
@@ -6430,8 +6460,14 @@ function netSend(m){
 function netBroadcast(m, except){ NET.conns.forEach((c, id) => { if (id !== except && c.open !== false) c.send(m); }); }
 const myPos = () => ({ id: NET.peer ? NET.peer.id : '', n: myName(), x: +P.pos.x.toFixed(2), y: +(P.pos.y - (P.sink || 0)).toFixed(2), z: +P.pos.z.toFixed(2), f: +P.facing.toFixed(2), m: P.path.length ? 1 : 0, s: G.equip.body || G.equip.head ? 1 : 0 });
 function netSendPos(){ if (NET.role && NET.peer && P.obj && S.mode === 'play') netSend(Object.assign({ t: 'pos' }, myPos())); }
+async function agreeRules(){
+  if (S.netRules) return true;
+  if (!await dialog({ title: 'Playing with others', msg: `Be kind. There’s zero tolerance for hateful, sexual, threatening or bullying messages or names. You can mute or report any player, and hosts can remove players. Reports go to ${SUPPORT_EMAIL} and are reviewed within 24 hours; players who break these rules can be blocked from the game.`, okLabel: 'I agree' })) return false;
+  S.netRules = true; savePrefs(); return true;
+}
 async function startHosting(){
   if (NET.role) return;
+  if (!await agreeRules()) return;
   if (!S.netName && !await askName()) return;
   if (!S.hostCode){ S.hostCode = newCode(); savePrefs(); }
   NET.status = 'Starting…'; renderSheet();
@@ -6472,12 +6508,13 @@ function joinScreen(msg, busy){
   let el = $('#netOverlay'); if (!el){ el = document.createElement('div'); el.id = 'netOverlay'; document.body.appendChild(el); }
   el.hidden = false;
   el.innerHTML = `<div><h1>World ${esc(JOIN)}</h1><p>${esc(msg || 'You’re joining a friend’s world. Your progress there is kept separate from your own world.')}</p>
+    ${busy ? '' : `<p style="font-size:14px">By joining you agree to be kind: zero tolerance for hateful, sexual, threatening or bullying messages or names. You can mute or report players; reports go to ${SUPPORT_EMAIL}.</p>`}
     ${busy ? '' : `<input id="njName" type="text" maxlength="20" placeholder="Your name" value="${esc(S.netName || '')}" aria-label="Your name"><div class="row"><button class="btn primary" data-nj="go">${msg ? 'Try again' : 'Join'}</button></div>`}
     <div class="row" style="margin-top:10px"><button class="btn" data-nj="back">Back to my own world</button></div></div>`;
   el.onclick = e => {
     const b = e.target.closest('[data-nj]'); if (!b) return; audioInit();
     if (b.dataset.nj === 'back'){ location.href = location.pathname; return; }
-    const nm = ($('#njName') || {}).value; S.netName = (nm || '').trim().slice(0, 20) || 'Adventurer'; savePrefs(); startJoin();
+    const nm = ($('#njName') || {}).value; S.netName = (nm || '').trim().slice(0, 20) || 'Adventurer'; S.netRules = true; savePrefs(); startJoin();
   };
 }
 function joinFailed(msg){ try { NET.peer && NET.peer.destroy(); } catch (e){} NET.role = ''; NET.peer = null; NET.host = null; NET.got = false; joinScreen(msg); }
@@ -6536,9 +6573,9 @@ function addChat(e){
   NET.chat.push(e); if (NET.chat.length > 40) NET.chat.shift();
   const log = $('#chatLog'); if (log){ log.innerHTML = chatHtml(); log.scrollTop = log.scrollHeight; }
   if (!e.sys){ const pl = e.id === 'me' ? NET.me : NET.players.get(e.id); if (pl){ pl.said = e.text; pl.until = performance.now() / 1000 + 6; } }
-  if (!(S.sheetOpen && S.gameTab === 'map' && S.mode === 'play')) toast(e.sys ? e.text : `${e.name}: ${e.text}`);
+  if (!(S.sheetOpen && S.gameTab === 'map' && S.mode === 'play')) toast(cleanText(e.sys ? e.text : `${e.name}: ${e.text}`));
 }
-const chatHtml = () => NET.chat.map(e => e.sys ? `<div class="sys">${esc(e.text)}</div>` : `<div><b>${esc(e.name)}:</b> ${esc(e.text)}</div>`).join('') || '<div class="sys">No messages yet.</div>';
+const chatHtml = () => NET.chat.map(e => e.sys ? `<div class="sys">${esc(cleanText(e.text))}</div>` : `<div><b>${esc(cleanText(e.name))}:</b> ${esc(cleanText(e.text))}</div>`).join('') || '<div class="sys">No messages yet.</div>';
 function receiveGift(d, fromId){
   if (!ITEMS[d.item]) return;
   const n = Math.max(1, Math.min(100000, Math.round(+d.qty) || 1)), pl = NET.players.get(fromId), nm = pl ? pl.name : (d.n || 'Someone');
@@ -6610,10 +6647,10 @@ function netTick(dt){
     if (pl.seen && t - pl.seen > 45) pl.obj.visible = false; // gone quiet (phone asleep?): hide them until they move again
     const said = !S.hideChat && pl.until > t ? pl.said : '';
     pl.tag.hidden = !play || !pl.obj.visible;
-    if (play){ const [x, y] = screenPos(o.position.clone().add(V(0, 1.75, 0))); pl.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = (said ? `<span class="say">${esc(said)}</span>` : '') + esc(pl.name); if (pl.tag._h !== html){ pl.tag._h = html; pl.tag.innerHTML = html; } }
+    if (play){ const [x, y] = screenPos(o.position.clone().add(V(0, 1.75, 0))); pl.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = (said ? `<span class="say">${esc(cleanText(said))}</span>` : '') + esc(cleanText(pl.name)); if (pl.tag._h !== html){ pl.tag._h = html; pl.tag.innerHTML = html; } }
   });
   const me = NET.me, mine = play && P.obj && !S.hideChat && me.until > t ? me.said : '';
-  if (mine){ if (!me.tag){ me.tag = document.createElement('div'); me.tag.className = 'ntag'; $('#fx').appendChild(me.tag); } const [x, y] = screenPos(P.pos.clone().add(V(0, 1.75 - (P.sink || 0), 0))); me.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = `<span class="say">${esc(mine)}</span>`; if (me.tag._h !== html){ me.tag._h = html; me.tag.innerHTML = html; } }
+  if (mine){ if (!me.tag){ me.tag = document.createElement('div'); me.tag.className = 'ntag'; $('#fx').appendChild(me.tag); } const [x, y] = screenPos(P.pos.clone().add(V(0, 1.75 - (P.sink || 0), 0))); me.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = `<span class="say">${esc(cleanText(mine))}</span>`; if (me.tag._h !== html){ me.tag._h = html; me.tag.innerHTML = html; } }
   else if (me.tag){ me.tag.remove(); me.tag = null; }
   if (!play || !P.obj) return;
   NET.sendT += dt;
@@ -6626,13 +6663,15 @@ function togetherPanel(){
   if (!NET.role) return `<h3 class="sec">Play together</h3>
     <p class="muted">Host this world and friends can join from their own phones with a code, or join someone else’s world. Each guest keeps their own skills and bag for each world they visit.</p>
     ${NET.status ? `<p class="muted">${esc(NET.status)}</p>` : ''}
-    <div class="row"><button class="btn primary" data-act="net-host">Host this world</button><button class="btn" data-act="net-join">Join a world</button><button class="btn sm" data-act="net-name">Name: ${esc(myName())}</button></div>`;
+    <div class="row"><button class="btn primary" data-act="net-host">Host this world</button><button class="btn" data-act="net-join">Join a world</button><button class="btn sm" data-act="net-name">Name: ${esc(myName())}</button></div>
+    <p class="muted">Questions or problems: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>`;
   const host = NET.role === 'host', others = [...NET.players.values()];
   return `<h3 class="sec">${host ? 'Hosting this world' : `In ${esc(NET.hostName || 'a friend')}’s world`}</h3>
     <div class="row"><span class="muted">Code</span><b style="font:700 20px 'Pixelify Sans',ui-monospace,monospace;letter-spacing:.12em">${esc(NET.code)}</b>${host ? '<button class="btn sm primary" data-act="net-invite">Invite</button><button class="btn sm" data-act="net-update">Send world update</button><button class="btn sm danger" data-act="net-stop">Stop hosting</button>' : '<button class="btn sm danger" data-act="net-leave">Leave</button>'}</div>
-    <ul class="pflist"><li><div class="meta"><b>${esc(myName())} (you)</b></div><button class="btn sm" data-act="net-name">Rename</button></li>${others.map(pl => `<li><div class="meta"><b>${esc(pl.name)}</b>${pl.muted ? '<span class="muted">Muted</span>' : ''}</div><div class="btns"><button class="btn sm" data-act="net-give" data-id="${esc(pl.id)}">Give</button><button class="btn sm${pl.muted ? ' on' : ''}" data-act="net-mute" data-id="${esc(pl.id)}">${pl.muted ? 'Unmute' : 'Mute'}</button>${host ? `<button class="btn sm danger" data-act="net-kick" data-id="${esc(pl.id)}">Remove</button>` : ''}</div></li>`).join('') || '<li class="muted">Nobody else here yet.</li>'}</ul>
+    <ul class="pflist"><li><div class="meta"><b>${esc(myName())} (you)</b></div><button class="btn sm" data-act="net-name">Rename</button></li>${others.map(pl => `<li><div class="meta"><b>${esc(cleanText(pl.name))}</b>${pl.muted ? '<span class="muted">Muted</span>' : ''}</div><div class="btns"><button class="btn sm" data-act="net-give" data-id="${esc(pl.id)}">Give</button><button class="btn sm${pl.muted ? ' on' : ''}" data-act="net-mute" data-id="${esc(pl.id)}">${pl.muted ? 'Unmute' : 'Mute'}</button><button class="btn sm" data-act="net-report" data-id="${esc(pl.id)}">Report</button>${host ? `<button class="btn sm danger" data-act="net-kick" data-id="${esc(pl.id)}">Remove</button>` : ''}</div></li>`).join('') || '<li class="muted">Nobody else here yet.</li>'}</ul>
     <div id="chatLog" class="chatlog" aria-live="polite">${chatHtml()}</div>
-    <div class="row"><input id="chatIn" type="text" maxlength="140" placeholder="Say something…" value="${esc(S.chatDraft || '')}" aria-label="Chat message" autocomplete="off"><button class="btn primary" data-act="chat-send">Send</button><button class="btn sm${S.hideChat ? ' on' : ''}" data-act="chat-hide" aria-pressed="${!!S.hideChat}">Hide bubbles</button></div>`;
+    <div class="row"><input id="chatIn" type="text" maxlength="140" placeholder="Say something…" value="${esc(S.chatDraft || '')}" aria-label="Chat message" autocomplete="off"><button class="btn primary" data-act="chat-send">Send</button><button class="btn sm${S.hideChat ? ' on' : ''}" data-act="chat-hide" aria-pressed="${!!S.hideChat}">Hide bubbles</button><button class="btn sm${S.chatFilter !== false ? ' on' : ''}" data-act="chat-filter" aria-pressed="${S.chatFilter !== false}">Filter chat</button></div>
+    <p class="muted">Be kind: there’s zero tolerance for hateful, sexual, threatening or bullying messages. Mute or report anyone; reports go to <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>`;
 }
 /* ---------- things: objects built from blocks ---------- */
 function comp(th, t){ return th && th.comps ? th.comps.find(c => c.t === t) || null : null; }
