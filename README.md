@@ -14,3 +14,10 @@ Hosting uses free player-to-player connections (WebRTC through the public PeerJS
 
 ## Safety (App Store guideline 1.2)
 Chat is filtered by default (players can switch it off), players can mute or report anyone, hosts can remove players, and everyone agrees to the community rules before hosting or joining. Reports open an email to jacoblc22@gmail.com with the player's name, the world code and their recent messages. Answer reports within 24 hours.
+
+## Before building the store apps
+Put `three.min.js` and `peerjs.min.js` in `vendor/` (links in `vendor/README.txt`). The game loads them first and only uses the internet when they're missing.
+
+## Pages
+- `privacy.html`: privacy policy (use its address in both app stores)
+- `support.html`: support page with contact details

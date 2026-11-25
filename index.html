@@ -340,6 +340,7 @@ textarea{width:100%;flex:1;min-height:42vh;resize:vertical;font:12px/1.35 ui-mon
       <li>Things you drop stay on the ground for a few minutes, even if you leave and come back. Days and nights pass while you play; the sun button in the top bar holds it at day or night instead.</li>
       <li><b>Chests, barrels and crates</b> hold your things: tap one to open it, then tap items to move them in and out. Any piece can be made a container from its In Play setting.</li>
       <li><b>Things (Create → Game → Things)</b>: invent anything from building blocks: Carry, Use, Body, Grows, Produces, Light, Aura, Storage, Station and On tap. Glowberry bushes in the village and the healing spring east of it are examples; plant glowberry seeds on tilled soil.</li>
+      <li><b>Privacy and support</b>: <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="support.html" target="_blank" rel="noopener">Support</a> · © 2026 Jacob Cooper</li>
       <li><b>Safety and contact</b>: chat is filtered unless you switch the filter off. Mute or report any player from the player list or by tapping them; reports go to the developer at <a href="mailto:jacoblc22@gmail.com">jacoblc22@gmail.com</a>, who reviews them within 24 hours. Hosts can remove players.</li>
       <li><b>Play together (Play → Map)</b>: host your world and friends join with a code or an invite link; see each other, chat, give items, and share falling trees and campfires. Join someone else's world with their code.</li>
       <li><b>Make any mechanic (Create → Game)</b>: <b>Skills</b> adds new skills that level like the rest. <b>Talk</b> builds branching conversations for people (or signs and objects), with choices that check conditions and run actions. <b>Rules</b> make things happen: when an item is used, an object is tapped, an area is entered, a creature dies, a skill levels, something is gathered or made, or a new game starts, check conditions (items, flags, numbers, skill levels, quests, area, night, chance) and run actions (give or take items, XP, flags, numbers, heal, hurt, teleport, start quests, teach spells, open a conversation, summon creatures, play a sound). Old Tom's chat, Alchemy and healing draughts are examples.</li>
@@ -382,7 +383,8 @@ textarea{width:100%;flex:1;min-height:42vh;resize:vertical;font:12px/1.35 ui-mon
 <div class="modal" id="guideModal" hidden><div class="dlg gd" role="dialog" aria-modal="true" aria-labelledby="gdTitle"><div id="guideBody"></div></div></div>
 <div id="menu" role="menu" hidden></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="vendor/three.min.js"></script>
+<script id="three-fallback">window.THREE || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>')</script>
 <script id="pw-main">
 (function(){
 'use strict';
@@ -2534,7 +2536,8 @@ function renderGuide(){
   const head = `<div class="gd-head">${icon ? `<img src="${icon}" alt="">` : ''}<h2 id="gdTitle">${c ? esc(c.title) : GAME ? 'How to play' : 'How to make a game'}</h2>${c ? '<button class="btn sm" data-act="guide-home" aria-label="All chapters">‹ Chapters</button>' : ''}<button class="btn sm" data-act="guide-close">Close</button></div>`;
   let body;
   if (!c) body = `<p>${GAME ? 'Everything you need to know to play.' : 'Pixelwright is a whole game maker in your pocket. These chapters walk you through making each kind of content, from your first box to quests, conversations and new mechanics. Tap one to start.'}</p>
-    <div class="gd-grid">${list.map((x, k) => `<button class="gd-card" data-act="guide-ch" data-id="${x.id}"><b>${k + 1}. ${esc(x.title)}</b><span>${esc(x.blurb)}</span></button>`).join('')}</div>`;
+    <div class="gd-grid">${list.map((x, k) => `<button class="gd-card" data-act="guide-ch" data-id="${x.id}"><b>${k + 1}. ${esc(x.title)}</b><span>${esc(x.blurb)}</span></button>`).join('')}</div>
+    <p class="muted" style="margin-top:14px"><a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="support.html" target="_blank" rel="noopener">Support</a> · <a href="mailto:jacoblc22@gmail.com">jacoblc22@gmail.com</a> · © 2026 Jacob Cooper</p>`;
   else if (c.ref) body = `<ul>${$('#helpModal ul').innerHTML}</ul>`;
   else {
     const k = list.indexOf(c), prev = list[k - 1], next = list[k + 1];
@@ -2650,6 +2653,8 @@ async function exportGame(){
   doc.title = title; commit();
   const dp = new DOMParser().parseFromString(PAGE_SRC, 'text/html');
   dp.querySelectorAll('script').forEach(sc => { if (sc.id !== 'pw-main' && !/three(\.min)?\.js/.test(sc.getAttribute('src') || '')) sc.remove(); }); // only the engine and the 3D library come along
+  let threeTag = false; // an exported file stands alone, so it loads the library from the web, once
+  dp.querySelectorAll('script[src]').forEach(sc => { if (!/three(\.min)?\.js/.test(sc.getAttribute('src'))) return; if (threeTag) sc.remove(); else { threeTag = true; sc.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'); } });
   dp.querySelectorAll('#titleScreen, #dlgModal .dlg').forEach(e => e.remove());
   const data = dp.createElement('script'); data.id = 'pw-game';
   data.textContent = 'window.PW_GAME = ' + JSON.stringify({ id: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) || 'game', title, doc }).replace(/</g, '\\u003c') + ';';
@@ -6448,7 +6453,8 @@ const NET_PREFIX = 'pixelwright-', PEER_SRC = 'https://unpkg.com/peerjs@1.5.4/di
 const SHIRTS = ['cloth', 'dress', 'robe', 'apron', 'trollskin', 'chitin', 'fur'];
 function loadPeer(){
   if (window.Peer) return Promise.resolve();
-  return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = PEER_SRC; sc.onload = () => window.Peer ? res() : rej(new Error('no Peer')); sc.onerror = () => rej(new Error('blocked')); document.head.appendChild(sc); });
+  const one = src => new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = () => window.Peer ? res() : rej(new Error('no Peer')); sc.onerror = () => { sc.remove(); rej(new Error('blocked')); }; document.head.appendChild(sc); });
+  return one('vendor/peerjs.min.js').catch(() => one(PEER_SRC)); // the copy shipped with the app first
 }
 function newCode(){ const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c = ''; for (let k = 0; k < 6; k++) c += A[Math.floor(Math.random() * A.length)]; return c; }
 const myName = () => (S.netName || 'Adventurer').slice(0, 20);
