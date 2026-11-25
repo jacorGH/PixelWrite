@@ -115,6 +115,16 @@ h3.sec{font:700 16px "Pixelify Sans",ui-monospace,monospace;margin:14px 0 4px}
 .inv{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-width:440px}
 .slot.pick{outline:2px solid var(--brass);outline-offset:-2px}
 .player #modeBtn{display:none}
+#netOverlay{position:fixed;inset:0;z-index:61;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#1c2638,#06080c);color:#f3ead2;text-align:center;padding:24px}
+#netOverlay h1{font:700 clamp(26px,8vw,44px)/1.1 "Pixelify Sans",ui-monospace,monospace;margin:0 0 8px;color:var(--brass)}
+#netOverlay p{margin:0 0 16px;opacity:.85;max-width:420px}
+#netOverlay .row{justify-content:center}
+#netOverlay input{font:inherit;font-size:17px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);width:min(260px,80vw);margin:0 0 12px}
+.ntag{position:absolute;left:0;top:0;pointer-events:none;text-align:center;white-space:nowrap;font:700 12px/1.2 "Pixelify Sans",ui-monospace,monospace;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
+.ntag .say{display:block;white-space:normal;width:max-content;max-width:180px;margin:0 auto 3px;padding:4px 8px;border-radius:9px;background:#fff;color:#111;text-shadow:none;font:500 13px/1.25 "Atkinson Hyperlegible",system-ui,sans-serif}
+.chatlog{max-height:150px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:6px 0;font-size:14px;background:var(--panel2)}
+.chatlog .sys{color:var(--muted);font-style:italic}
+#chatIn{flex:1;min-width:120px;font:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--line)}
 #titleScreen{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#1c2638,#06080c);color:#f3ead2;text-align:center;padding:24px}
 #titleScreen h1{font:700 clamp(30px,9vw,54px)/1.1 "Pixelify Sans",ui-monospace,monospace;margin:0 0 8px;color:var(--brass)}
 #titleScreen p{margin:0 0 22px;opacity:.7}
@@ -329,6 +339,8 @@ textarea{width:100%;flex:1;min-height:42vh;resize:vertical;font:12px/1.35 ui-mon
       <li><b>Combat</b>: tap a rat or goblin to fight. Pick a style in Combat to train Attack, Strength or Defence; eat food to heal. Creatures drop things on the ground: tap to pick them up. Bury bones for Prayer.</li>
       <li>Things you drop stay on the ground for a few minutes, even if you leave and come back. Days and nights pass while you play; the sun button in the top bar holds it at day or night instead.</li>
       <li><b>Chests, barrels and crates</b> hold your things: tap one to open it, then tap items to move them in and out. Any piece can be made a container from its In Play setting.</li>
+      <li><b>Things (Create → Game → Things)</b>: invent anything from building blocks: Carry, Use, Body, Grows, Produces, Light, Aura, Storage, Station and On tap. Glowberry bushes in the village and the healing spring east of it are examples; plant glowberry seeds on tilled soil.</li>
+      <li><b>Play together (Play → Map)</b>: host your world and friends join with a code or an invite link; see each other, chat, give items, and share falling trees and campfires. Join someone else's world with their code.</li>
       <li><b>Make any mechanic (Create → Game)</b>: <b>Skills</b> adds new skills that level like the rest. <b>Talk</b> builds branching conversations for people (or signs and objects), with choices that check conditions and run actions. <b>Rules</b> make things happen: when an item is used, an object is tapped, an area is entered, a creature dies, a skill levels, something is gathered or made, or a new game starts, check conditions (items, flags, numbers, skill levels, quests, area, night, chance) and run actions (give or take items, XP, flags, numbers, heal, hurt, teleport, start quests, teach spells, open a conversation, summon creatures, play a sound). Old Tom's chat, Alchemy and healing draughts are examples.</li>
       <li><b>Stacking and the bank</b>: materials, food, bones, logs, ores and buckets stack in one slot. Use Sort and Arrange under your bag to tidy it. The bank booth on the village path stores unlimited stacks; the altar east of the village restores prayer.</li>
       <li><b>Prayer</b>: bury bones to train it, then switch prayers on in the Magic tab for defence, strength, accuracy, faster healing, or half damage. They drain prayer points.</li>
@@ -571,6 +583,8 @@ function defaultTextures(){
   Object.entries({ heal: [4, 2, 20], glow: [19, 31, 20], stoneskin: [12, 11, 13], icelance: [23, 21, 25], levitate: [27, 26, 25], recall: [22, 21, 27] }).forEach(([k, [a, b, c]], n) => { const t = tomeI(80 + n, a, b, c); t.name = 'Tome icon: ' + k; T['icon_tome_' + k] = t; });
   T.icon_emberstaff = gen('Staff of Embers icon', 90, (x, y) => { const d = Math.hypot(x - 11.5, y - 3.5); if (d < 2.6) return d > 1.8 ? 18 : 20; if (Math.abs(x + y - 15) <= .6 && y >= 5 && y <= 14) return (x + y) % 2 ? 7 : 6; return -1; });
   T.icon_oakbow = gen('Oak shortbow icon', 91, (x, y) => { const d = Math.hypot(x - 2, y - 13); if (d >= 10 && d <= 11.3 && x >= 2 && y <= 13) return d > 10.7 ? 6 : 8; if (Math.abs(x - y + 1) <= .5 && x >= 2 && x <= 12) return 14; return -1; });
+  T.icon_glowberry = gen('Glowberry icon', 105, (x, y) => { for (const [cx, cy] of [[5, 9], [10.5, 9], [7.5, 12.5], [8, 6]]){ const d = Math.hypot(x - cx, y - cy); if (d < 2.6) return d > 1.9 ? 21 : (x < cx && y < cy ? 25 : 23); } if (y < 4 && Math.abs(x - 9) <= 3 - y) return 2; return -1; });
+  T.icon_glowseed = gen('Glowberry seeds icon', 106, (x, y) => { for (const [cx, cy] of [[5, 6], [10, 5], [7, 10], [11, 11], [4, 12]]){ const d = Math.hypot((x - cx) / 1.6, (y - cy) / 1.1); if (d < 1) return d > .7 ? 6 : (x + y) % 3 ? 7 : 23; } return -1; });
   T.icon_herb = gen('Herb icon', 103, (x, y) => { const stem = x === 7 && y > 8 && y < 15; if (stem) return 3; const l = [[5, 5], [10, 6], [7, 3], [4, 9], [11, 10]].some(([cx, cy]) => Math.hypot((x - cx) / 2.2, (y - cy) / 1.4) < 1); return l ? ((x + y) % 4 ? 2 : 30) : -1; });
   T.icon_draught = gen('Draught icon', 104, (x, y) => { if (y >= 2 && y <= 4 && x >= 6 && x <= 9) return y === 2 ? 7 : 14; const d = Math.hypot(x - 7.5, (y - 10) * 1.1); if (y >= 5 && d < 5){ if (d > 4.2) return 14; return y < 8 ? 25 : (x + y) % 5 ? 16 : 20; } return -1; });
   T.needles = gen('Pine needles', 60, (x, y, r) => { const v = r(); return v < .25 ? 2 : v < .35 ? 30 : 3; }, { shell: { layers: 4, height: .12, density: .7, wind: .02 } });
@@ -1133,6 +1147,14 @@ const VEX_QUESTS = {
     steps: [{ type: 'kill', creature: 'lich', count: 1, hint: 'Defeat the Drowned Lich in the Sunken Crypt.' }],
     done: ['Ha! I knew it.', 'The best thing I have ever made. It is yours.'], reward: { items: [['crystalsword', 1], ['bronzeplate', 1]], xp: [['attack', 2000], ['strength', 2000]], spells: [] } }
 };
+// Things: anything you invent, built from blocks (see COMPS). These four show the idea.
+const THING_DEFAULTS = {
+  glowseed: { name: 'Glowberry seeds', desc: 'Plant them in tilled soil.', icon: 'icon_glowseed', comps: [{ t: 'carry', stack: true, value: 3 }] },
+  glowbush: { name: 'Glowberry bush', desc: 'Its berries shine faintly in the dark.', icon: 'icon_glowberry', comps: [{ t: 'body', model: 'berrybush' }, { t: 'grow', seed: 'glowseed', time: 90, lvl: 1, xp: 12, soil: true }, { t: 'produce', item: 'glowberry', n: 1, every: 25, max: 6, verb: 'Pick', skill: 'farming', xp: 6 }, { t: 'light' }] },
+  glowberry: { name: 'Glowberry', desc: 'Sweet, cold and faintly glowing. Eating one heals a little and lights your way.', icon: 'icon_glowberry', comps: [{ t: 'carry', stack: true, value: 6 }, { t: 'use', label: 'Eat', consume: true, fail: '', conds: [], actions: [{ t: 'heal', n: 3 }, { t: 'glow', dur: 60 }, { t: 'say', text: 'The berry fizzes on your tongue, and your skin begins to glow.' }] }] },
+  spring: { name: 'Healing spring', desc: 'Clear water that mends wounds while you stand beside it.', icon: '', comps: [{ t: 'body', model: 'spring' }, { t: 'aura', radius: 2.2, every: 2, conds: [], actions: [{ t: 'heal', n: 1 }] }, { t: 'light' }] }
+};
+const THING_SPOTS = [['glowbush', [3, 0, 9]], ['glowbush', [6, 0, 9]], ['glowbush', [-3, 0, 9]], ['spring', [13, 0, -1]]];
 const XP_RATE_DEFAULTS = { attack: 2, strength: 2, defence: 2, hitpoints: 1.5, ranged: 2, magic: 1.25, prayer: 1.5, swimming: .3, firemaking: .6, woodcutting: .7, cooking: .75 };
 const SKILL_DEFAULTS = { alchemy: { name: 'Alchemy', desc: 'Brewing draughts from herbs.' } };
 const MECH_ITEMS = {
@@ -1156,7 +1178,9 @@ const DIALOGUE_DEFAULTS = {
     herbs: { text: 'Goblins carry them, and wolves roll in them. Two herbs and a bucket of water make a healing draught at the workbench. That’s Alchemy, that is.', next: 'start', actions: [], choices: [] },
     gift: { text: 'Here, take these. Don’t tell the goblins.', next: '', actions: [{ t: 'give', id: 'herb', n: 2 }, { t: 'flag', id: 'tomHerbs' }], choices: [] } } }
 };
-const START_DEFAULTS = { spells: ['firebolt'], items: [['axe', 1], ['tinderbox', 1], ['net', 1], ['bucket', 2], ['seeds', 6], ['bronzepick', 1], ['sword', 1], ['shield', 1], ['coins', 25]] };
+const START_DEFAULTS = { spells: ['firebolt'], items: [['glowseed', 3], ['axe', 1], ['tinderbox', 1], ['net', 1], ['bucket', 2], ['seeds', 6], ['bronzepick', 1], ['sword', 1], ['shield', 1], ['coins', 25]] };
+function berryBushPrefab(){ return { name: 'Berry bush', items: [pfB('cyl', [0, 0, 0], [.18, .35, .18], T3('bark'), { seg: 5, taper: .8 }), pfB('ball', [0, .2, 0], [1.1, .9, 1.1], T3('leaves'), { dome: 'ball', seg: 7 })] }; }
+function springPrefab(){ return { name: 'Spring', items: [pfB('box', [0, 0, -.8], [2, .3, .4], T3('stonewall')), pfB('box', [0, 0, .8], [2, .3, .4], T3('stonewall')), pfB('box', [-.8, 0, 0], [.4, .3, 1.2], T3('stonewall')), pfB('box', [.8, 0, 0], [.4, .3, 1.2], T3('stonewall')), pfB('plane', [0, .18, 0], [1.2, .0625, 1.2], T3('water'))] }; }
 function bankPrefab(){ const it = [pfB('box', [0, 0, 0], [1.6, .9, .7], T3('planks')), pfB('box', [0, .9, 0], [1.7, .1, .8], T3('metal')), pfB('box', [-.75, 1, 0], [.1, .9, .1], T3('planks')), pfB('box', [.75, 1, 0], [.1, .9, .1], T3('planks')), pfB('box', [0, 1.9, 0], [1.7, .35, .3], T3('rust'))]; it.forEach(i => { i.act = 'bank'; }); return { name: 'Bank booth', items: it }; }
 function altarPrefab(){ const it = [pfB('box', [0, 0, 0], [1.4, .25, .9], T3('stonewall')), pfB('box', [0, .25, 0], [1.2, .65, .7], T3('stone')), pfB('box', [0, .9, 0], [1.4, .12, .9], T3('stonewall')), pfB('cyl', [-.5, 1.02, 0], [.1, .25, .1], T3('cloth'), { seg: 5 }), pfB('cyl', [.5, 1.02, 0], [.1, .25, .1], T3('cloth'), { seg: 5 }), pfB('cyl', [-.5, 1.27, 0], [.08, .12, .08], T3('fire'), { seg: 4, taper: 0 }), pfB('cyl', [.5, 1.27, 0], [.08, .12, .08], T3('fire'), { seg: 4, taper: 0 })]; it.forEach(i => { i.act = 'altar'; }); return { name: 'Altar', items: it }; }
 function pinePrefab(){ return { name: 'Pine', items: [pfB('cyl', [0, 0, 0], [.4, 1.2, .4], T3('bark'), { seg: 6, taper: .8 }), pfB('cyl', [0, .8, 0], [2, 1.4, 2], T3('needles'), { seg: 7, taper: 0 }), pfB('cyl', [0, 1.7, 0], [1.5, 1.2, 1.5], T3('needles'), { seg: 7, taper: 0 }), pfB('cyl', [0, 2.5, 0], [1, 1, 1], T3('needles'), { seg: 6, taper: 0 })] }; }
@@ -1265,7 +1289,7 @@ function wellPrefab(){
   ]};
 }
 function demoDoc(){
-  const d = { v: 14, palette: PALETTE.slice(), textures: defaultTextures(), prefabs: {}, world: { size: 32, ground: 'grass', items: [] } };
+  const d = { v: 15, palette: PALETTE.slice(), textures: defaultTextures(), prefabs: {}, world: { size: 32, ground: 'grass', items: [] } };
   const B = (kind, pos, size, tex, opt, rot) => ({ id: uid(), kind, pos, size, rot: rot || 0, tex: tex || {}, opt: opt || {} });
   const P = (ref, pos, rot) => ({ id: uid(), kind: 'prefab', ref, pos, rot: rot || 0 });
   const win = T3('window');
@@ -1313,7 +1337,9 @@ function demoDoc(){
   Object.entries(NPC_PREFABS).forEach(([id, fn]) => { d.prefabs[id] = fn(); });
   Object.assign(d, { npcs: clone(Object.assign({}, NPC_DEFAULTS, VEX_NPC)), quests: clone(Object.assign({}, QUEST_DEFAULTS, VEX_QUESTS)), shops: clone(Object.assign({}, SHOP_DEFAULTS, VEX_SHOP)), crops: clone(CROP_DEFAULTS), start: clone(START_DEFAULTS), spells: clone(SPELL_DEFAULTS) });
   Object.assign(d.items, clone(MAGIC_ITEMS), clone(GEAR_ITEMS), clone(MECH_ITEMS));
-  Object.assign(d, { skills: clone(SKILL_DEFAULTS), rules: clone(RULE_DEFAULTS), dialogues: clone(DIALOGUE_DEFAULTS) });
+  Object.assign(d, { skills: clone(SKILL_DEFAULTS), rules: clone(RULE_DEFAULTS), dialogues: clone(DIALOGUE_DEFAULTS), things: clone(THING_DEFAULTS) });
+  d.prefabs.berrybush = berryBushPrefab(); d.prefabs.spring = springPrefab();
+  for (const [th, pos] of THING_SPOTS) W.push({ id: uid(), kind: 'prefab', ref: d.things[th].comps[0].model, pos: pos.slice(), rot: 0, thing: th });
   d.recipes.push(...clone(MECH_RECIPES)); d.npcs.tom.dialogue = 'tomchat';
   for (const [mid, ch] of [['goblin', .5], ['wolf', .3]]) if (d.monsters[mid]) d.monsters[mid].drops.push(['herb', ch, 1]);
   for (const [id, [ch, n]] of Object.entries(GEAR_DROPS)) if (d.monsters[id]) d.monsters[id].drops.push(['hide', ch, n]);
@@ -1513,6 +1539,14 @@ function normalizeDoc(d){
     if (isO(d.start) && !Array.isArray(d.start.spells)) d.start.spells = ['firebolt'];
     if (!d.world.items.some(i => i.kind === 'npcspot' && i.opt && i.opt.npc === 'vex')) d.world.items.push({ id: uid(), kind: 'npcspot', pos: [7, 0, 2.6], size: [1, .0625, 1], rot: 0, tex: { top: 'npcmark' }, opt: { npc: 'vex', wander: 1 } });
   }
+  if (ver < 15){ // things built from blocks: glowberries and a healing spring as examples
+    const dt = defaultTextures(); for (const id of ['icon_glowberry', 'icon_glowseed']) if (!d.textures[id]) d.textures[id] = dt[id];
+    if (!d.prefabs.berrybush) d.prefabs.berrybush = berryBushPrefab();
+    if (!d.prefabs.spring) d.prefabs.spring = springPrefab();
+    d.things = isO(d.things) ? d.things : {}; for (const [id, th] of Object.entries(THING_DEFAULTS)) if (!d.things[id]) d.things[id] = clone(th);
+    if (!d.world.items.some(i => i.thing)) for (const [th, pos] of THING_SPOTS) d.world.items.push({ id: uid(), kind: 'prefab', ref: THING_DEFAULTS[th].comps[0].model, pos: pos.slice(), rot: 0, thing: th });
+    if (isO(d.start) && Array.isArray(d.start.items) && !d.start.items.some(r => r[0] === 'glowseed')) d.start.items.push(['glowseed', 3]);
+  }
   if (ver < 14){ // make-anything: custom skills, rules and conversations, with examples
     const dt = defaultTextures(); for (const id of ['icon_herb', 'icon_draught']) if (!d.textures[id]) d.textures[id] = dt[id];
     d.items = isO(d.items) ? d.items : {}; for (const [id, it] of Object.entries(MECH_ITEMS)) if (!d.items[id]) d.items[id] = clone(it);
@@ -1539,7 +1573,7 @@ function normalizeDoc(d){
   }
   { // custom skills, rules and conversations
     const strs2 = a => (Array.isArray(a) ? a : []).map(x => String(x));
-    const cond = c => isO(c) && typeof c.t === 'string' ? { t: c.t, id: String(c.id ?? ''), n: clampN(c.n, -1e9, 1e9, 1), op: String(c.op || ''), text: String(c.text || ''), state: String(c.state || 'done') } : null;
+    const cond = c => isO(c) && typeof c.t === 'string' ? { t: c.t, id: String(c.id ?? ''), n: clampN(c.n, -1e9, 1e9, 1), op: String(c.op || ''), text: String(c.text || ''), state: String(c.state || 'done'), dur: clampN(c.dur, 0, 3600, 30) } : null;
     const list = a => (Array.isArray(a) ? a : []).map(cond).filter(Boolean);
     d.skills = isO(d.skills) ? d.skills : {};
     const BASE = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic', 'prayer', 'crafting', 'mining', 'smithing', 'fishing', 'cooking', 'woodcutting', 'firemaking', 'farming', 'swimming'];
@@ -1555,6 +1589,25 @@ function normalizeDoc(d){
       d.dialogues[id] = { name: String(dl.name || id), speaker: String(dl.speaker || ''), nodes };
     }
     void strs2;
+    const S2 = (v, def = '') => String(v ?? def);
+    const NC = {
+      carry: c => ({ t: 'carry', stack: c.stack !== false, value: clampN(c.value, 0, 1e6, 5, true) }),
+      use: c => ({ t: 'use', label: S2(c.label, 'Use') || 'Use', consume: c.consume !== false, fail: S2(c.fail), conds: list(c.conds), actions: list(c.actions) }),
+      body: c => ({ t: 'body', model: S2(c.model) }),
+      grow: c => ({ t: 'grow', seed: S2(c.seed), time: clampN(c.time, 5, 604800, 60, true), lvl: clampN(c.lvl, 1, 99, 1, true), xp: clampN(c.xp, 0, 1000, 10, true), soil: c.soil !== false }),
+      produce: c => ({ t: 'produce', item: S2(c.item), n: clampN(c.n, 1, 99, 1, true), every: clampN(c.every, 1, 604800, 30, true), max: clampN(c.max, 1, 99, 5, true), verb: S2(c.verb, 'Pick') || 'Pick', skill: S2(c.skill, 'farming') || 'farming', xp: clampN(c.xp, 0, 1000, 5, true) }),
+      light: () => ({ t: 'light' }),
+      aura: c => ({ t: 'aura', radius: clampN(c.radius, .5, 12, 2), every: clampN(c.every, .5, 600, 3), conds: list(c.conds), actions: list(c.actions) }),
+      storage: () => ({ t: 'storage' }),
+      station: c => ({ t: 'station', id: S2(c.id, 'bench') }),
+      tap: c => ({ t: 'tap', label: S2(c.label, 'Use') || 'Use', fail: S2(c.fail), conds: list(c.conds), actions: list(c.actions) })
+    };
+    d.things = isO(d.things) ? d.things : {};
+    for (const [id, th] of Object.entries(d.things)){
+      if (!isO(th) || !/^[a-z0-9_]+$/.test(id)){ delete d.things[id]; continue; }
+      const seen = new Set();
+      d.things[id] = { name: String(th.name || id), desc: String(th.desc || ''), icon: String(th.icon || ''), comps: (Array.isArray(th.comps) ? th.comps : []).filter(c => isO(c) && NC[c.t] && !seen.has(c.t) && seen.add(c.t)).map(c => NC[c.t](c)) };
+    }
   }
   { // spells
     d.spells = isO(d.spells) ? d.spells : {};
@@ -1614,28 +1667,30 @@ function normalizeDoc(d){
   d.recipes = (Array.isArray(d.recipes) ? d.recipes : []).filter(r => r && typeof r.makes === 'string').map(r => ({
     makes: r.makes, qty: clampN(r.qty, 1, 99, 1, true), lvl: clampN(r.lvl, 1, 99, 1, true), xp: clampN(r.xp, 0, 1000, 10, true), time: clampN(r.time, 0, 600, 0, true), at: typeof r.at === 'string' && r.at ? r.at : 'bench', skill: String(r.skill || 'crafting'),
     needs: (Array.isArray(r.needs) ? r.needs : []).filter(n => Array.isArray(n) && typeof n[0] === 'string').map(([id, n]) => [id, clampN(n, 1, 99, 1, true)]) }));
-  d.v = 14;
+  d.v = 15;
   return d;
 }
 
 /* ---------- state, history, persistence ---------- */
 const PAGE_SRC = '<!DOCTYPE html>\n' + document.documentElement.outerHTML; // this very page, for exporting a playable copy
 const GAME = window.PW_GAME && typeof window.PW_GAME === 'object' ? window.PW_GAME : null; // set inside an exported game
-const KSUF = GAME ? '.' + String(GAME.id || 'game').replace(/[^\w-]/g, '') : '';
+const JOIN = (() => { try { return (new URLSearchParams(location.search).get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || null; } catch (e){ return null; } })(); // joining a friend's world
+const KSUF = JOIN ? '.guest-' + JOIN : GAME ? '.' + String(GAME.id || 'game').replace(/[^\w-]/g, '') : '';
 const KEY = 'pixelwright.doc.v1' + KSUF, PKEY = 'pixelwright.prefs.v1' + KSUF;
 const S = { tool: 'build', ctx: 'world', sel: new Set(), multi: false, preset: 'wall', buildRot: 0, curTex: 'brick',
   paintMode: 'paint', wholeObj: false, step: .5, pxTool: 'pencil', pxColor: 16, mirror: false, sheetOpen: true, grid: true, shells: true, pxScale: 2, worldCam: null, prevTool: 'build',
-  land: { mode: 'raise', size: 2, step: .25, grow: 8, depth: 1 }, mode: 'create', gameTab: 'bag', guideCh: null, dlgEdit: null, ruleEdit: null, music: true, sfx: true, worldOffered: false, shadows: true, weather: true, arrange: false, pickSlot: null, bank: null, skillGuide: null, monEdit: null, spellEdit: null, areaEdit: null, genSize: 160, landArea: '.', talk: null, shop: null, cropEdit: null, npcEdit: null, questEdit: null, shopEdit: null, placeNpc: null, itemsTab: 'world', resEdit: null, dayMode: 'cycle', box: null, craft: null, itemEdit: null, rcEdit: null, paintRot: 0,
+  land: { mode: 'raise', size: 2, step: .25, grow: 8, depth: 1 }, mode: 'create', gameTab: 'bag', guideCh: null, thingEdit: null, dlgEdit: null, ruleEdit: null, music: true, sfx: true, worldOffered: false, shadows: true, weather: true, arrange: false, pickSlot: null, bank: null, skillGuide: null, monEdit: null, spellEdit: null, areaEdit: null, genSize: 160, landArea: '.', talk: null, shop: null, cropEdit: null, npcEdit: null, questEdit: null, shopEdit: null, placeNpc: null, itemsTab: 'world', resEdit: null, dayMode: 'cycle', box: null, craft: null, itemEdit: null, rcEdit: null, paintRot: 0,
   model: { id: null, mode: 'face', sel: new Set(), axis: 'all', step: .25, angle: 45, swipe: false, last: null },
   code: { scope: 'world', text: null, gen: '', live: false, err: null, cand: null, selr: null, scroll: null } };
 let doc;
 try {
   const s = localStorage.getItem(KEY);
-  doc = GAME && GAME.doc ? normalizeDoc(JSON.parse(JSON.stringify(GAME.doc))) : s ? normalizeDoc(JSON.parse(s)) : demoDoc();
+  doc = JOIN ? (s ? normalizeDoc(JSON.parse(s)) : demoDoc()) : GAME && GAME.doc ? normalizeDoc(JSON.parse(JSON.stringify(GAME.doc))) : s ? normalizeDoc(JSON.parse(s)) : demoDoc();
 } catch (e){ doc = demoDoc(); }
-try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (typeof p.grid === 'boolean') S.grid = p.grid; if (typeof p.shells === 'boolean') S.shells = p.shells; if ([1, 2, 3, 4].includes(p.pxScale)) S.pxScale = p.pxScale; S.startPlay = p.mode === 'play'; if (['cycle', 'day', 'night'].includes(p.day)) S.dayMode = p.day; if (typeof p.music === 'boolean') S.music = p.music; if (typeof p.sfx === 'boolean') S.sfx = p.sfx; S.worldOffered = !!p.worldOffered; if (typeof p.shadows === 'boolean') S.shadows = p.shadows; if (typeof p.weather === 'boolean') S.weather = p.weather; } catch (e){}
+try { const p = JSON.parse(localStorage.getItem(PKEY) || '{}'); if (typeof p.grid === 'boolean') S.grid = p.grid; if (typeof p.shells === 'boolean') S.shells = p.shells; if ([1, 2, 3, 4].includes(p.pxScale)) S.pxScale = p.pxScale; S.startPlay = p.mode === 'play'; if (['cycle', 'day', 'night'].includes(p.day)) S.dayMode = p.day; if (typeof p.music === 'boolean') S.music = p.music; if (typeof p.sfx === 'boolean') S.sfx = p.sfx; S.worldOffered = !!p.worldOffered; if (typeof p.shadows === 'boolean') S.shadows = p.shadows; if (typeof p.weather === 'boolean') S.weather = p.weather; if (typeof p.netName === 'string') S.netName = p.netName.slice(0, 20); if (typeof p.hostCode === 'string' && /^[A-Z0-9]{6}$/.test(p.hostCode)) S.hostCode = p.hostCode; S.hideChat = !!p.hideChat; } catch (e){}
 if (GAME){ S.startPlay = true; S.worldOffered = true; document.documentElement.classList.add('player'); document.title = GAME.title || 'Pixelwright'; }
-const savePrefs = () => { try { localStorage.setItem(PKEY, JSON.stringify({ grid: S.grid, shells: S.shells, pxScale: S.pxScale, mode: S.mode, day: S.dayMode, music: S.music, sfx: S.sfx, worldOffered: S.worldOffered, shadows: S.shadows, weather: S.weather })); } catch (e){} };
+if (JOIN){ S.startPlay = true; S.worldOffered = true; document.documentElement.classList.add('player'); document.title = 'Joining ' + JOIN + ' · Pixelwright'; }
+const savePrefs = () => { try { localStorage.setItem(PKEY, JSON.stringify({ grid: S.grid, shells: S.shells, pxScale: S.pxScale, mode: S.mode, day: S.dayMode, music: S.music, sfx: S.sfx, worldOffered: S.worldOffered, shadows: S.shadows, weather: S.weather, netName: S.netName, hostCode: S.hostCode, hideChat: S.hideChat })); } catch (e){} };
 
 let hist = [JSON.stringify(doc)], hi = 0, saveT = 0;
 function save(){ clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, hist[hi]); } catch (e){} }, 300); }
@@ -2077,7 +2132,7 @@ function rebuild(){
   updateGridVis(); axes.visible = !inWorld;
   updateGroundShell();
   applyFelled();
-  collectGlow();
+  collectGlow(); updateThings(true);
   updateSel();
 }
 let modelBits = [];
@@ -2221,6 +2276,7 @@ function growMap(side, a, quiet){
   w.water.forEach(b => b.spans.forEach(sp => { sp[0] += offJ; sp[1] += offI; sp[2] += offI; }));
   G.crops = Object.fromEntries(Object.entries(G.crops).map(([k, t]) => { const [i, j] = k.split(',').map(Number); return [(i + offI) + ',' + (j + offJ), t]; }));
   G.ground.forEach(g => { g.x += dx; g.z += dz; });
+  G.plants = Object.fromEntries(Object.entries(G.plants).map(([k, v]) => { v.x += dx; v.z += dz; if (!k.startsWith('tile:')) return [k, v]; const [i, j] = k.slice(5).split(',').map(Number); return ['tile:' + (i + offI) + ',' + (j + offJ), v]; }));
   if (w.coreAt){ w.coreAt[0] = q(w.coreAt[0] + dx); w.coreAt[1] = q(w.coreAt[1] + dz); }
   if (w.dungeon) w.dungeon.j0 += offJ;
   saveGame(); updateCrops(true);
@@ -2452,6 +2508,16 @@ const GUIDE = [
     intro: 'Big worlds are areas joined by roads and portals.',
     steps: ['Game → <b>World</b>: Generate grows your village into five lands and a dungeon. Generating again only replaces what was generated.', 'Areas have a name and danger level; mark dungeons as Dark. Paint them in Land → Area.', 'Portals: place a <b>Portal</b> from Build, name it in Select, and choose which portal it leads to. Two portals that name each other make a two-way door.', 'Game → <b>Crops</b>: plants that grow over time on tilled soil.'],
     go: [{ label: 'Open World', to: { tool: 'items', itab: 'world' } }, { label: 'Paint areas', to: { tool: 'land', land: 'area' } }] },
+  { id: 'things', title: 'Things: build anything from blocks', blurb: 'Plants with fruit, potions, springs, lamps…',
+    intro: 'A thing is a name, an icon and a stack of building blocks. Each block adds one ability, so you can make almost anything without code.',
+    steps: ['Game → <b>Things</b> → <b>New thing from…</b> and pick a template. “A plant that bears fruit” makes three things at once: the seeds, the bush and the fruit.', 'Tap <b>Edit</b> to see its blocks. Add more from <b>Add a block…</b>; remove one with ×.', '<b>Carry</b> puts it in your bag. <b>Use</b> lets you eat, drink or read it, with conditions and effects. <b>Body</b> gives it a shape in the world.', '<b>Grows</b> plants it from a seed, <b>Produces</b> makes items to pick over time (even while the game is closed), <b>Light</b> glows, <b>Aura</b> affects anyone nearby, <b>Storage</b> holds things, <b>Station</b> crafts recipes, and <b>On tap</b> runs actions.', 'Effects include heal, boost a stat, move faster, heal or poison over time, cure, glow and levitate, plus every rule action.', 'Things with a Body appear at the end of Build’s list. Seeds that need soil are planted by tapping tilled soil in Play; others from the bag.'],
+    examples: [['Glowberries (in the village)', 'Seeds (Carry) → bush (Body, Grows, Produces, Light) → berry (Carry, Use: heal 3 and glow).'], ['Healing spring (east of the village)', 'Body + Aura: heal 1 every 2 seconds within 2 tiles, + Light.'], ['Poison mushroom', 'Carry + Use: Eat → poison 2 for 10 seconds, show “That was a mistake.”'], ['Talking statue', 'Body + On tap: open a conversation.'], ['Beehive', 'Body + Produces honey every 2 minutes, + Aura: only if not wearing a helm, hurt 1.']],
+    tip: 'Things with Carry are items too: put them in shops, recipes, quest rewards and creature drops.',
+    go: [{ label: 'Open Things', to: { tool: 'items', itab: 'things' } }] },
+  { id: 'together', title: 'Play together', blurb: 'Host your world, or join a friend’s', play: true,
+    intro: 'One person hosts their world and up to 7 friends join from their own phones. Everyone walks around the same world together.',
+    steps: ['In Play, open <b>Map</b> and scroll to <b>Play together</b>. Set your name.', 'The host taps <b>Host this world</b> and gets a 6-letter code. <b>Invite</b> shares the code (and a link, on the web).', 'Friends tap <b>Join a world</b> and type the code, or open the link.', 'You see each other with name tags and chat bubbles. Tap a player to give them something, mute them, or (if you’re the host) remove them.', 'Trees and rocks gathered by anyone fall for everyone, and campfires are shared. Creatures, crops and chests are still each player’s own.', 'Each guest keeps separate skills and a bag for every world they visit. After editing, the host taps <b>Send world update</b>.'],
+    tip: 'The world stays open only while the host’s app is open. When the host leaves, everyone returns to the join screen.' },
   { id: 'share', title: 'Test and share', blurb: 'Play-testing, exporting and GitHub Pages',
     intro: 'When it is ready, turn your world into a game anyone can play.',
     steps: ['Tap <b>Play</b> to test. Map → <b>New game</b> starts fresh with your starting kit, at the Player start piece.', 'Game → World → <b>Export playable game</b> saves one HTML file with a title screen and no editing tools. Players’ progress saves on their own device.', '<b>Back up world</b> saves your work to a file; <b>Load world file</b> brings a backup (or an exported game) back.', 'To put it online, upload the file to a GitHub repository as index.html and turn on GitHub Pages in the repository’s settings.'],
@@ -2560,6 +2626,7 @@ function drawMap(cv){
   doc.world.items.forEach(it => { if (it.kind === 'portal') dot(it.pos[0], it.pos[2], 3.5, '#a77be0'); });
   if (S.mode === 'play'){
     MOBS.forEach(m => { if (!m.dead) dot(m.pos.x, m.pos.z, 1.6, '#d9463c'); });
+    NET.players.forEach(pl => dot(pl.tx, pl.tz, 3.8, '#5ad1ff'));
     NPCS.forEach(n => { const offer = Object.entries(doc.quests).some(([qid, q]) => q.giver === n.defId && !G.quests[qid] && reqMet(q)); dot(n.pos.x, n.pos.z, offer ? 4 : 2.6, offer ? '#ffd23a' : '#e8d9a0'); });
     if (P.obj){ const [px, py] = at(P.pos.x, P.pos.z); c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.moveTo(px, py); c.lineTo(px + Math.sin(P.facing) * 9, py + Math.cos(P.facing) * 9); c.stroke(); dot(P.pos.x, P.pos.z, 4.5, '#ffffff'); }
   } else { const [px, py] = at(camS.target.x, camS.target.z); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.strokeRect(px - 8, py - 6, 16, 12); }
@@ -2840,6 +2907,7 @@ function onTap(x, y){
 /* ---------- build / paint ---------- */
 function presetById(id){
   if (id && id.startsWith('pf:')){ const pf = doc.prefabs[id.slice(3)]; return pf ? { prefab: id.slice(3), label: pf.name } : null; }
+  if (id && id.startsWith('th:')){ const th = doc.things[id.slice(3)], b = th && comp(th, 'body'); return b && doc.prefabs[b.model] ? { prefab: b.model, label: th.name, thing: id.slice(3) } : null; }
   return PRESETS.find(p => p.id === id) || null;
 }
 const footprint = it => (it.rot & 1) ? [it.size[2], it.size[0]] : [it.size[0], it.size[2]];
@@ -2860,6 +2928,7 @@ function placeAt(h){
     let x = p.x, z = p.z, y = q(p.y);
     if (!h.isGround && !top){ x += n.x * .5; z += n.z * .5; y = baseY; }
     it = { id: uid(), kind: 'prefab', ref: pr.prefab, pos: [snapTo(x, .5), y, snapTo(z, .5)], rot: S.buildRot };
+    if (pr.thing) it.thing = pr.thing;
   } else {
     it = { id: uid(), kind: pr.kind, pos: [0, 0, 0], size: pr.size.slice(), rot: S.buildRot, tex: { ...pr.tex }, opt: { ...(pr.opt || {}) } };
     if (pr.mesh) it.mesh = clone(pr.mesh);
@@ -3308,8 +3377,48 @@ const A = {
     let i = steps.findIndex(x => x >= cur - 1e-6); if (i < 0) i = steps.length;
     i = steps[i] !== undefined && Math.abs(steps[i] - cur) < 1e-6 ? i + d : d > 0 ? i : i - 1; i = Math.max(0, Math.min(steps.length - 1, i));
     doc.xpRates[k] = steps[i]; commit(); renderSheet(); },
+  'net-host': () => startHosting(),
+  'net-stop': () => { stopNet(); toast('You stopped hosting.'); },
+  'net-leave': () => { location.href = location.pathname; },
+  'net-name': async () => { if (await askName()){ netSendPos(); renderSheet(); } },
+  'net-join': async () => {
+    const v = await dialog({ title: 'Join a world', msg: 'Type the code your friend sees under “Hosting this world”.', input: '', okLabel: 'Join', max: 8 }); if (v == null) return;
+    const code = v.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4){ toast('That code looks too short.'); return; }
+    location.href = location.pathname + '?join=' + code;
+  },
+  'net-invite': async () => {
+    const url = /^https?:$/.test(location.protocol) ? location.origin + location.pathname + '?join=' + NET.code : '', text = `Join my Pixelwright world! Open Pixelwright, tap Map → Join a world, and type ${NET.code}.`;
+    try { if (navigator.share){ await navigator.share(url ? { title: 'Pixelwright', text, url } : { title: 'Pixelwright', text }); return; } } catch (e){ if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(url ? text + ' ' + url : text); toast('Invite copied. Paste it to your friends.'); } catch (e){ toast(`Your code is ${NET.code}.`); }
+  },
+  'net-update': () => { netBroadcast({ t: 'world', doc: JSON.stringify(doc), code: NET.code, host: myName() }); toast('Sent your latest world to everyone.'); },
+  'net-give': b => { const pl = NET.players.get(b.dataset.id); if (!pl) return; S.giveTo = pl.id; S.gameTab = 'bag'; S.sheetOpen = true; renderTop(); renderSheet(); toast(`Tap something in your bag to give it to ${pl.name}.`); },
+  'give-cancel': () => { S.giveTo = null; renderSheet(); },
+  'net-mute': b => { const pl = NET.players.get(b.dataset.id); if (!pl) return; pl.muted = !pl.muted; if (pl.muted) pl.until = 0; renderSheet(); toast(pl.muted ? `You won’t see messages from ${pl.name}.` : `${pl.name} is unmuted.`); },
+  'net-kick': async b => {
+    const pl = NET.players.get(b.dataset.id), c = NET.conns.get(b.dataset.id); if (!pl || NET.role !== 'host') return;
+    if (!await dialog({ title: `Remove ${pl.name}?`, msg: 'They can join again with the code unless you stop hosting.', okLabel: 'Remove' })) return;
+    if (c){ c.send({ t: 'kick' }); setTimeout(() => { try { c.close(); } catch (e){} }, 300); }
+    netLeft(pl.id); renderSheet();
+  },
+  'chat-send': () => {
+    const ci = $('#chatIn'), text = ((ci && ci.value) || '').trim().slice(0, 140); if (!text || !NET.role) return;
+    netSend({ t: 'chat', id: NET.peer.id, n: myName(), text }); addChat({ id: 'me', name: myName(), text });
+    S.chatDraft = ''; if (ci){ ci.value = ''; ci.focus(); }
+  },
+  'chat-hide': () => { S.hideChat = !S.hideChat; savePrefs(); renderSheet(); },
   'xp-reset': () => { doc.xpRates = clone(XP_RATE_DEFAULTS); commit(); renderSheet(); toast('Skill rates set to the recommended balance.'); },
   'xp-flat': () => { doc.xpRates = {}; commit(); renderSheet(); toast('Every skill earns experience at ×1.'); },
+  'g-bool': b => { const o = pathGet(b.dataset.path); if (!o) return; o[b.dataset.k] = !o[b.dataset.k]; commit(); renderSheet(); },
+  'th-edit': b => { S.thingEdit = S.thingEdit === b.dataset.id ? null : b.dataset.id; renderSheet(); },
+  'th-open': b => { S.itemsTab = 'things'; S.thingEdit = b.dataset.id; setTool('items'); },
+  'th-unlink': () => { const it = selItems()[0]; if (!it) return; delete it.thing; commit(); renderSheet(); toast('It’s a plain prefab again.'); },
+  'th-place': b => { const th = doc.things[b.dataset.id], bd = th && comp(th, 'body'); if (!bd || !doc.prefabs[bd.model]){ toast('Give it a Body first.'); return; } S.preset = 'th:' + b.dataset.id; setTool('build'); toast(`Tap to place ${th.name}.`); },
+  'th-draw': b => {
+    const id = b.dataset.id, th = doc.things[id]; if (!th) return;
+    if (!th.icon || !tdef(th.icon)){ let k = 'icon_' + id; while (doc.textures[k]) k += '2'; doc.textures[k] = { name: th.name + ' icon', rows: iconRows(berryIcon(FRUIT_COLS[0])) }; th.icon = k; }
+    S.curTex = th.icon; commit(); setTool('pixels'); toast(`Drawing the icon for ${th.name}. Clear pixels stay see-through.`);
+  },
   'sk-new': async () => {
     const name = await dialog({ title: 'Name the new skill', input: 'Alchemy', okLabel: 'Create' }); if (!name) return;
     let id = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'skill'; while (doc.skills[id] || SKILLS.some(x => x[0] === id)) id += '2';
@@ -3490,6 +3599,11 @@ const A = {
       renderSheet(); return;
     }
     if (!id) return;
+    if (S.giveTo){
+      if (stackable(id) && G.qty[i] > 1){ const r0 = b.getBoundingClientRect(); showMenu(r0.left + r0.width / 2, r0.top, ITEMS[id].name, [{ label: 'Give 1', run: () => giveSlot(i, 1) }, { label: `Give all ${G.qty[i]}`, run: () => giveSlot(i, G.qty[i]) }]); }
+      else giveSlot(i, 1);
+      return;
+    }
     if (S.bank){ bankStore(i); return; }
     if (S.box){ if (storeSlot(i)){ saveGame(); renderSheet(); } return; }
     if (S.shop){
@@ -3500,6 +3614,7 @@ const A = {
     const def = ITEMS[id], r = b.getBoundingClientRect();
     const opts = (def.use || []).map(([label, fn]) => ({ label, run: () => { fn(i); saveGame(); renderSheet(); } }));
     if (isBeltItem(id) && !G.belt.includes(id)) opts.unshift({ label: 'Put on belt', run: () => { G.belt.push(id); G.inv[i] = null; G.qty[i] = 0; saveGame(); renderSheet(); } });
+    Object.entries(doc.things).forEach(([tid2, th]) => { const g2 = comp(th, 'grow'); if (g2 && g2.seed === id) opts.unshift({ label: `Plant ${th.name.toLowerCase()}`, run: () => plantHere(i, tid2) }); });
     doc.rules.forEach(r => { if (r.on === 'use' && r.target === id && !(r.once && G.done[r.id])) opts.unshift({ label: r.label || 'Use', run: () => ruleAct(r) }); });
     if (stackable(id) && G.qty[i] > 1) opts.push({ label: 'Drop 1', run: () => { takeOne(i); dropGround(id, P.pos, 1); saveGame(); renderSheet(); } });
     opts.push({ label: 'Examine', run: () => toast(def.desc) });
@@ -3668,6 +3783,7 @@ function inspector(){
         ? (() => { const ch = typeof s.choices === 'function' ? s.choices() : s.choices, v = o[s.k] ?? ch[0]; return `<div class="stp"><span>${s.label}</span><button class="btn wide" data-act="opt" data-k="${s.k}">${esc(typeof s.names === 'function' ? s.names(v) : s.names[v])}</button></div>`; })()
         : stepper(s.label, fmt(o[s.k] ?? s.def), `data-act="opt" data-k="${s.k}"`)).join('') + '</div>';
   }
+  if (one && one.thing && doc.things[one.thing]) h += `<div class="row" style="margin:10px 0 0"><span class="muted">Thing</span><b>${esc(doc.things[one.thing].name)}</b><button class="btn sm" data-act="th-open" data-id="${esc(one.thing)}">Edit its blocks</button><button class="btn sm" data-act="th-unlink">Make it plain</button></div>`;
   if (one) h += `<div class="row" style="margin:10px 0 0"><span class="muted">In Play</span><button class="btn sm" data-act="act-cycle">${esc(actName(one.act || 'auto'))}</button></div>`;
   h += `<div class="row" style="margin:10px 0 0">${one && one.kind === 'prefab' ? `<button class="btn" data-act="pf-edit" data-id="${esc(one.ref)}">Edit prefab</button><button class="btn" data-act="unpack">Unpack into pieces</button>` : ''}${one && one.kind !== 'prefab' ? '<button class="btn primary" data-act="shape-edit">Edit shape</button>' : ''}<button class="btn" data-act="code-sel">Edit as text</button></div>`;
   return h + '</div>';
@@ -3676,7 +3792,9 @@ function buildSheet(){
   const chips = PRESETS.map(p => `<button class="chip${S.preset === p.id ? ' on' : ''}" data-act="preset" data-id="${p.id}">${thumb(mainTex(p))}<span>${p.label}</span></button>`);
   const pfs = Object.entries(doc.prefabs).filter(([id]) => id !== S.ctx)
     .map(([id, p]) => `<button class="chip pf${S.preset === 'pf:' + id ? ' on' : ''}" data-act="preset" data-id="pf:${esc(id)}">${thumb(prefabTex(p))}<span>${esc(p.name)}</span></button>`);
-  return `<div class="strip" data-keep="presets">${chips.join('')}${pfs.length ? '<span class="sep"></span>' + pfs.join('') : ''}</div>
+  const ths = Object.entries(doc.things).filter(([, th]) => { const b = comp(th, 'body'); return b && doc.prefabs[b.model]; })
+    .map(([id, th]) => `<button class="chip pf${S.preset === 'th:' + id ? ' on' : ''}" data-act="preset" data-id="th:${esc(id)}">${th.icon && tdef(th.icon) ? thumb(th.icon) : thumb(prefabTex(doc.prefabs[comp(th, 'body').model]))}<span>${esc(th.name)}</span></button>`);
+  return `<div class="strip" data-keep="presets">${chips.join('')}${pfs.length ? '<span class="sep"></span>' + pfs.join('') : ''}${ths.length ? '<span class="sep"></span>' + ths.join('') : ''}</div>
   <div class="row"><button class="btn" data-act="build-rot">${icon('rotR', 16)} Turn ${S.buildRot * 90}°</button><span class="muted">Tap the ground or a surface to place.</span></div>${inspector()}`;
 }
 function selectSheet(){
@@ -3844,13 +3962,17 @@ function movesPanel(){
   ${small ? '<div class="row"><button class="btn primary" data-act="world-now">Generate the wider world</button></div>' : ''}
   <div class="row"><button class="btn${S.music ? ' on' : ''}" data-act="music" aria-pressed="${S.music}">Music</button><button class="btn${S.sfx ? ' on' : ''}" data-act="sounds" aria-pressed="${S.sfx}">Sounds</button><button class="btn${S.weather ? ' on' : ''}" data-act="weather" aria-pressed="${S.weather}">Weather</button><button class="btn${S.shadows ? ' on' : ''}" data-act="shadows" aria-pressed="${S.shadows}">Shadows</button></div>
   <div class="row"><button class="btn${P.follow ? ' on' : ''}" data-act="follow" aria-pressed="${P.follow}">Camera follows</button><button class="btn" data-act="recenter">Find me</button><button class="btn danger" data-act="new-game">New game</button></div>
-  <p class="muted">Tap the ground to walk. Tap water to fish, fill buckets or swim; trees to chop; soil to farm; fires to cook; creatures to fight; things on the ground to pick up. Walk in through a door and the roof lifts away.</p>`;
+  <p class="muted">Tap the ground to walk. Tap water to fish, fill buckets or swim; trees to chop; soil to farm; fires to cook; creatures to fight; things on the ground to pick up. Walk in through a door and the roof lifts away.</p>
+  ${togetherPanel()}`;
 }
 const beltHtml = () => G.belt.length ? `<div class="belt" role="group" aria-label="Tool belt"><span class="muted">Belt</span>${G.belt.map((id, i) => ITEMS[id] ? `<button class="slot" data-act="belt" data-i="${i}" aria-label="${esc(ITEMS[id].name)} on your belt"><canvas width="16" height="16" data-icon="${id}"></canvas></button>` : '').join('')}</div>` : '';
 const slotHtml = (id, n, act, i) => `<button class="slot${act === 'inv' && S.pickSlot === i ? ' pick' : ''}" data-act="${act}" data-i="${i}" aria-label="${id && ITEMS[id] ? esc(ITEMS[id].name) + (stackable(id) ? ', ' + n : '') : 'Empty slot'}">${id && ITEMS[id] ? `<canvas width="16" height="16" data-icon="${id}"></canvas>${stackable(id) ? `<span class="qty">${n}</span>` : ''}` : ''}</button>`;
 function bagPanel(){
   let top = '';
-  if (S.box){
+  if (S.giveTo && !NET.players.has(S.giveTo)) S.giveTo = null;
+  if (S.giveTo){
+    top = `<div class="row"><b>Give to ${esc(NET.players.get(S.giveTo).name)}</b><span class="muted">Tap something in your bag.</span><span style="flex:1"></span><button class="btn sm" data-act="give-cancel">Cancel</button></div>`;
+  } else if (S.box){
     const b = boxOf(S.box.key);
     top = `<div class="row"><b>${esc(S.box.name)}</b><span class="muted">Tap your things to put them in; tap these to take them out.</span></div>
     <div class="row"><button class="btn sm" data-act="box-all">Store everything</button><button class="btn sm" data-act="box-close">Close</button></div>
@@ -3984,7 +4106,7 @@ const gStrList = (path, options, addLabel) => (pathGet(path) || []).map((v, i) =
 const spellOpts = () => Object.entries(doc.spells).map(([k, sp]) => [k, sp.name]);
 // condition and action lists, shared by rules and conversations
 const CT = { has: ['Has item', ['item', 'n']], flag: ['Flag is set', ['flag']], noflag: ['Flag is not set', ['flag']], var: ['Number is', ['var', 'cmp', 'n']], level: ['Skill level at least', ['skill', 'n']], quest: ['Quest is', ['quest', 'state']], area: ['Is in area', ['area']], wearing: ['Is wearing', ['item']], night: ['It is night', []], chance: ['Chance (%)', ['n']] };
-const AT = { say: ['Show a message', ['text']], give: ['Give item', ['item', 'n']], take: ['Take item', ['item', 'n']], xp: ['Give XP', ['skill', 'n']], flag: ['Set flag', ['flag']], unflag: ['Clear flag', ['flag']], var: ['Change number', ['var', 'chg', 'n']], heal: ['Heal', ['n']], hurt: ['Hurt', ['n']], mp: ['Restore magicka', ['n']], teleport: ['Teleport to portal', ['portal']], home: ['Send home', []], quest: ['Start quest', ['quest']], spell: ['Teach spell', ['spell']], talk: ['Open conversation', ['dialogue']], spawn: ['Summon creature', ['monster', 'n']], sound: ['Play a sound', ['sound']] };
+const AT = { boost: ['Boost a stat for a while', ['stat', 'n', 'dur']], speed: ['Move faster for a while (%)', ['n', 'dur']], regen: ['Heal over time', ['n', 'dur']], poison: ['Poison (hurt over time)', ['n', 'dur']], cure: ['Cure poison', []], glow: ['Glow for a while', ['dur']], levitate: ['Levitate for a while', ['dur']], say: ['Show a message', ['text']], give: ['Give item', ['item', 'n']], take: ['Take item', ['item', 'n']], xp: ['Give XP', ['skill', 'n']], flag: ['Set flag', ['flag']], unflag: ['Clear flag', ['flag']], var: ['Change number', ['var', 'chg', 'n']], heal: ['Heal', ['n']], hurt: ['Hurt', ['n']], mp: ['Restore magicka', ['n']], teleport: ['Teleport to portal', ['portal']], home: ['Send home', []], quest: ['Start quest', ['quest']], spell: ['Teach spell', ['spell']], talk: ['Open conversation', ['dialogue']], spawn: ['Summon creature', ['monster', 'n']], sound: ['Play a sound', ['sound']] };
 function fieldUi(path, f, o){
   const sel = (opts) => gSel(path, 'id', opts, '');
   switch (f){
@@ -4003,6 +4125,8 @@ function fieldUi(path, f, o){
     case 'chg': return gSel(path, 'op', [['+', 'add'], ['-', 'subtract'], ['=', 'set to']], '');
     case 'state': return gSel(path, 'state', [['done', 'finished'], ['active', 'in progress'], ['none', 'not started']], '');
     case 'n': return `<button class="btn sm" data-act="g-numtext" data-path="${esc(path)}" data-k="n">${o.n ?? 0}</button>`;
+    case 'dur': return `<span class="muted">for</span><button class="btn sm" data-act="g-numtext" data-path="${esc(path)}" data-k="dur">${o.dur ?? 30}s</button>`;
+    case 'stat': return gSel(path, 'id', [['str', 'Strength'], ['acc', 'Accuracy'], ['def', 'Defence'], ['mag', 'Magic']], '');
   }
   return '';
 }
@@ -4014,6 +4138,90 @@ function mechList(path, T, addLabel, kind){
 }
 const condList = (path, label = 'Add a condition…') => mechList(path, CT, label, 'cond');
 const actList = (path, label = 'Add an action…') => mechList(path, AT, label, 'act');
+// the blocks a thing can be built from
+const COMPS = {
+  carry: { name: 'Carry', desc: 'It can go in your bag.', make: () => ({ t: 'carry', stack: true, value: 5 }) },
+  use: { name: 'Use', desc: 'Does something when you use it from your bag: eat, drink, read, wave…', make: () => ({ t: 'use', label: 'Use', consume: true, fail: '', conds: [], actions: [] }) },
+  body: { name: 'Body', desc: 'It stands in the world, made from a prefab. Place it from Build, or plant it.', make: () => ({ t: 'body', model: doc.prefabs.berrybush ? 'berrybush' : Object.keys(doc.prefabs)[0] || '' }) },
+  grow: { name: 'Grows', desc: 'Planted from a seed; grows over time.', make: () => ({ t: 'grow', seed: '', time: 60, lvl: 1, xp: 10, soil: true }) },
+  produce: { name: 'Produces', desc: 'Makes items over time, ready to pick. Keeps going while the game is closed.', make: () => ({ t: 'produce', item: '', n: 1, every: 30, max: 5, verb: 'Pick', skill: 'farming', xp: 5 }) },
+  light: { name: 'Light', desc: 'Glows in the dark.', make: () => ({ t: 'light' }) },
+  aura: { name: 'Aura', desc: 'Affects you while you stand nearby: heal, hurt, poison, boost…', make: () => ({ t: 'aura', radius: 2, every: 3, conds: [], actions: [] }) },
+  storage: { name: 'Storage', desc: 'You can keep things in it, like a chest.', make: () => ({ t: 'storage' }) },
+  station: { name: 'Station', desc: 'A crafting station: recipes for it are made here.', make: () => ({ t: 'station', id: 'bench' }) },
+  tap: { name: 'On tap', desc: 'Does something when you tap it in the world.', make: () => ({ t: 'tap', label: 'Use', fail: '', conds: [], actions: [] }) }
+};
+const gBool = (path, k, label) => { const o = pathGet(path) || {}; return `<button class="btn sm${o[k] ? ' on' : ''}" data-act="g-bool" data-path="${esc(path)}" data-k="${k}" aria-pressed="${!!o[k]}">${esc(label)}</button>`; };
+const iconRows = fn => Array.from({ length: TS }, (_, y) => Array.from({ length: TS }, (_, x) => { const v = fn(x, y); return v < 0 ? '.' : CH[v]; }).join(''));
+const berryIcon = ([a, b, c]) => (x, y) => { for (const [cx, cy] of [[5, 9], [10.5, 9], [7.5, 12.5], [8, 6]]){ const d = Math.hypot(x - cx, y - cy); if (d < 2.6) return d > 1.9 ? b : (x < cx && y < cy ? c : a); } if (y < 4 && Math.abs(x - 9) <= 3 - y) return 2; return -1; };
+const seedIcon = ([a]) => (x, y) => { for (const [cx, cy] of [[5, 6], [10, 5], [7, 10], [11, 11], [4, 12]]){ const d = Math.hypot((x - cx) / 1.6, (y - cy) / 1.1); if (d < 1) return d > .7 ? 6 : (x + y) % 3 ? 7 : a; } return -1; };
+const FRUIT_COLS = [[16, 17, 20], [23, 21, 25], [19, 18, 20], [27, 26, 25], [3, 2, 20], [15, 17, 19]];
+function blockCard(cp, c, i, id){
+  const C = COMPS[c.t], prefabs = Object.entries(doc.prefabs).map(([k, f]) => [k, f.name]), lbl = t => `<p class="muted" style="margin:6px 0 2px">${t}</p>`;
+  let f = '';
+  switch (c.t){
+    case 'carry': f = `<div class="row">${gBool(cp, 'stack', 'Stacks in one slot')}</div><div class="stps">${gNum(cp, 'value', 'Value (coins)', 5, 0, 1e6)}</div>`; break;
+    case 'use': f = `<div class="row">${gText(cp, 'label', 'Option: ' + c.label)}${gBool(cp, 'consume', 'Used up')}${gText(cp, 'fail', c.fail ? 'If not: ' + c.fail.slice(0, 24) : 'Message if it can’t be used')}</div>${lbl('Only if')}${condList(cp + '.conds')}${lbl('Then')}${actList(cp + '.actions', 'Add an effect…')}`; break;
+    case 'body': f = `<div class="row">${gSel(cp, 'model', prefabs, 'Looks like')}<button class="btn sm primary" data-act="th-place" data-id="${esc(id)}">Place in the world</button></div><p class="muted">Copies you already placed keep their old look. Make a new prefab in Prefabs for a new look.</p>`; break;
+    case 'grow': f = `<div class="row">${gSel(cp, 'seed', [['', 'Choose a seed…'], ...itemOpts()], 'Grows from')}${gBool(cp, 'soil', 'Needs tilled soil')}</div><div class="stps">${gNum(cp, 'time', 'Grows in (s)', 10, 5, 604800)}${gNum(cp, 'lvl', 'Farming level', 1, 1, 99)}${gNum(cp, 'xp', 'XP to plant', 1, 0, 1000)}</div>`; break;
+    case 'produce': f = `<div class="row">${gSel(cp, 'item', [['', 'Choose an item…'], ...itemOpts()], 'Makes')}${gText(cp, 'verb', 'Verb: ' + c.verb)}${gSel(cp, 'skill', SKILLS.map(([k, n]) => [k, n]), 'Trains')}</div><div class="stps">${gNum(cp, 'n', 'How many', 1, 1, 99)}${gNum(cp, 'every', 'Every (s)', 5, 1, 604800)}${gNum(cp, 'max', 'Holds up to', 1, 1, 99)}${gNum(cp, 'xp', 'XP each', 1, 0, 1000)}</div>`; break;
+    case 'aura': f = `<div class="stps">${gNum(cp, 'radius', 'Reach (tiles)', .5, .5, 12)}${gNum(cp, 'every', 'Every (s)', .5, .5, 600)}</div>${lbl('Only if')}${condList(cp + '.conds')}${lbl('Then')}${actList(cp + '.actions', 'Add an effect…')}`; break;
+    case 'station': f = `<div class="row">${gSel(cp, 'id', Object.entries(doc.stations).map(([k, st]) => [k, st.name]), 'Station')}</div>`; break;
+    case 'tap': f = `<div class="row">${gText(cp, 'label', 'Option: ' + c.label)}${gText(cp, 'fail', c.fail ? 'If not: ' + c.fail.slice(0, 24) : 'Message if conditions fail')}</div>${lbl('Only if')}${condList(cp + '.conds')}${lbl('Then')}${actList(cp + '.actions')}`; break;
+  }
+  return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:0 0 8px"><div class="row"><b>${C.name}</b><span class="muted" style="flex:1">${C.desc}</span><button class="btn sm danger" data-act="lst-rm" data-path="things.${esc(id)}.comps" data-i="${i}" aria-label="Remove the ${C.name} block">×</button></div>${f}</div>`;
+}
+function thingWarnings(th){
+  const w = [], has = t => !!comp(th, t);
+  if (!has('carry') && !has('body')) w.push('Add Carry or Body so it can exist somewhere.');
+  if (has('use') && !has('carry')) w.push('Use needs Carry: you use things from your bag.');
+  if (has('grow') && !comp(th, 'grow').seed) w.push('Choose a seed for Grows.');
+  if (has('produce') && !ITEMS[comp(th, 'produce').item]) w.push('Choose an item for Produces.');
+  if (['grow', 'produce', 'aura', 'light', 'storage', 'station', 'tap'].some(has) && !has('body')) w.push('Add a Body so it shows up in the world.');
+  return w.length ? `<p class="gd-tip">${w.map(esc).join('<br>')}</p>` : '';
+}
+function thingEditor(id){
+  const th = doc.things[id], p = 'things.' + id;
+  return `<div class="row">${gText(p, 'name', 'Rename')}${gText(p, 'desc', th.desc ? 'Description' : 'Describe it')}${gSel(p, 'icon', [['', 'No icon'], ...texOpts()], 'Icon')}<button class="btn sm" data-act="th-draw" data-id="${esc(id)}">Draw icon</button></div>
+    ${thingWarnings(th)}${th.comps.map((c, i) => blockCard(p + '.comps.' + i, c, i, id)).join('')}
+    <div class="row"><select data-th-add="${esc(id)}" aria-label="Add a block"><option value="">Add a block…</option>${Object.entries(COMPS).filter(([k]) => !comp(th, k)).map(([k, C]) => `<option value="${k}">${C.name}: ${esc(C.desc)}</option>`).join('')}</select></div>
+    <div class="row"><button class="btn sm danger" data-act="g-del" data-path="things" data-k="${esc(id)}" data-what="${esc(th.name)}">Delete thing</button></div>`;
+}
+function thingsSection(){
+  const tpl = [['plant', 'A plant that bears fruit (3 things)'], ['food', 'Food or potion'], ['spring', 'Healing spring'], ['lamp', 'Magic lamp'], ['blank', 'Blank thing']];
+  return `<p class="muted">Things are made of building blocks. Stack them to make anything: a fruit with an effect, the bush that grows it, a spring that heals, a lamp that whispers. Start from a template or a blank thing, then add, remove and tune blocks.</p>
+  <div class="row"><select data-th-new aria-label="Make a new thing"><option value="">New thing from…</option>${tpl.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
+  <ul class="pflist">${Object.entries(doc.things).map(([id, th]) => { const open = S.thingEdit === id, b = comp(th, 'body'), pf = b && doc.prefabs[b.model];
+    return editLi(open, `${th.icon && tdef(th.icon) ? thumb(th.icon) : thumb(pf ? prefabTex(pf) : 'stone')}<div class="meta"><b>${esc(th.name)}</b><span class="muted">${th.comps.map(c => COMPS[c.t].name).join(' · ') || 'No blocks yet'}</span></div><div class="btns">${pf ? `<button class="btn sm" data-act="th-place" data-id="${esc(id)}">Place</button>` : ''}<button class="btn sm${open ? ' on' : ''}" data-act="th-edit" data-id="${esc(id)}">${open ? 'Close' : 'Edit'}</button></div>`, thingEditor(id)); }).join('') || '<li class="muted">No things yet.</li>'}</ul>`;
+}
+async function newThing(kind){
+  const names = { plant: 'Sunberry', food: 'Honey cake', spring: 'Moon spring', lamp: 'Wisp lantern', blank: 'Curious thing' };
+  const name = await dialog({ title: 'Name it', input: names[kind] || 'Thing', okLabel: 'Create', max: 40 }); if (!name) return;
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'thing';
+  const free = base => { let k = base; while (doc.things[k] || ITEMS[k] || (doc.items || {})[k]) k += '2'; return k; };
+  const pf = k => { if (!doc.prefabs[k]){ const fn = { berrybush: berryBushPrefab, spring: springPrefab, ...WORLD_PREFABS }[k]; if (fn) doc.prefabs[k] = fn(); } return doc.prefabs[k] ? k : Object.keys(doc.prefabs)[0] || ''; };
+  const A = (t, o) => Object.assign({ t, id: '', n: 1, op: '+', text: '', state: 'done', dur: 30 }, o);
+  const col = FRUIT_COLS[Math.floor(Math.random() * FRUIT_COLS.length)];
+  let open;
+  if (kind === 'plant'){
+    const fruit = free(slug), seed = free(slug + 'seeds'), bush = free(slug + 'bush');
+    doc.textures['icon_' + fruit] = { name: name + ' icon', rows: iconRows(berryIcon(col)) };
+    doc.textures['icon_' + seed] = { name: name + ' seeds icon', rows: iconRows(seedIcon(col)) };
+    doc.things[seed] = { name: name + ' seeds', desc: 'Plant them in tilled soil.', icon: 'icon_' + seed, comps: [COMPS.carry.make()] };
+    doc.things[fruit] = { name, desc: 'Fresh and good to eat.', icon: 'icon_' + fruit, comps: [{ t: 'carry', stack: true, value: 6 }, { t: 'use', label: 'Eat', consume: true, fail: '', conds: [], actions: [A('heal', { n: 3 })] }] };
+    doc.things[bush] = { name: name + ' bush', desc: 'It bears ' + name.toLowerCase() + '.', icon: 'icon_' + fruit, comps: [{ t: 'body', model: pf('berrybush') }, { t: 'grow', seed, time: 90, lvl: 1, xp: 10, soil: true }, { t: 'produce', item: fruit, n: 1, every: 30, max: 5, verb: 'Pick', skill: 'farming', xp: 6 }] };
+    doc.start.items.push([seed, 3]); open = bush;
+    toast(`Made ${name}, its seeds and its bush. New games start with 3 seeds. Open ${name} → Use to change what eating it does.`);
+  } else if (kind === 'food'){
+    open = free(slug); doc.textures['icon_' + open] = { name: name + ' icon', rows: iconRows(berryIcon(col)) };
+    doc.things[open] = { name, desc: 'Tasty.', icon: 'icon_' + open, comps: [{ t: 'carry', stack: true, value: 10 }, { t: 'use', label: 'Eat', consume: true, fail: '', conds: [], actions: [A('heal', { n: 6 }), A('boost', { id: 'str', n: 2, dur: 60 })] }] };
+  } else if (kind === 'spring'){
+    open = free(slug); doc.things[open] = { name, desc: 'Its water mends wounds.', icon: '', comps: [{ t: 'body', model: pf('spring') }, { t: 'aura', radius: 2, every: 2, conds: [], actions: [A('heal', { n: 1 })] }, { t: 'light' }] };
+  } else if (kind === 'lamp'){
+    open = free(slug); doc.things[open] = { name, desc: 'A little flame that seems to watch you.', icon: '', comps: [{ t: 'body', model: pf('brazier') }, { t: 'light' }, { t: 'tap', label: 'Touch the flame', fail: '', conds: [], actions: [A('say', { text: 'The flame whispers your name, and warmth runs through you.' }), A('glow', { dur: 90 })] }] };
+  } else { open = free(slug); doc.things[open] = { name, desc: '', icon: '', comps: [] }; }
+  S.thingEdit = open; commit(); renderSheet();
+}
 function skillsSection(){
   const rates = SKILLS.map(([k, nm]) => stepper(nm, '×' + fmt(xpRate(k)), `data-act="xp-rate" data-k="${k}"`)).join('');
   return `<h3 class="sec">How fast skills level</h3><p class="muted">Each skill's experience is multiplied by its rate: ×2 levels twice as fast, ×0.5 half as fast. Quest and rule rewards are given exactly as you set them.</p>
@@ -4101,7 +4309,7 @@ const TOOL_NAMES = { woodcutting: 'Woodcutting', mining: 'Mining', fishing: 'Fis
 const skillName = k => (SKILLS.find(x => x[0] === k) || [k, k])[1];
 const skillOptions = sel => SKILLS.map(([k, n]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${n}</option>`).join('') + (SKILLS.some(x => x[0] === sel) ? '' : `<option value="${esc(sel)}" selected>${esc(sel)}</option>`);
 function itemsSheet(){
-  const tabs = [['world', 'World'], ['skills', 'Skills'], ['talk', 'Talk'], ['rules', 'Rules'], ['items', 'Items'], ['stations', 'Stations'], ['resources', 'Resources'], ['recipes', 'Recipes'], ['crops', 'Crops'], ['npcs', 'People'], ['quests', 'Quests'], ['shops', 'Shops'], ['spells', 'Spells'], ['start', 'Start']];
+  const tabs = [['world', 'World'], ['things', 'Things'], ['skills', 'Skills'], ['talk', 'Talk'], ['rules', 'Rules'], ['items', 'Items'], ['stations', 'Stations'], ['resources', 'Resources'], ['recipes', 'Recipes'], ['crops', 'Crops'], ['npcs', 'People'], ['quests', 'Quests'], ['shops', 'Shops'], ['spells', 'Spells'], ['start', 'Start']];
   const head = `<div class="strip" data-keep="gtabs" role="group" aria-label="Section">${tabs.map(([v, l]) => `<button class="btn sm${(S.itemsTab || 'items') === v ? ' on' : ''}" data-act="itab" data-v="${v}">${l}</button>`).join('')}</div>`;
   if (S.itemsTab === 'crops') return head + cropsSection();
   if (S.itemsTab === 'npcs') return head + npcsSection();
@@ -4112,6 +4320,7 @@ function itemsSheet(){
   if (S.itemsTab === 'skills') return head + skillsSection();
   if (S.itemsTab === 'talk') return head + talkSection();
   if (S.itemsTab === 'rules') return head + rulesSection();
+  if (S.itemsTab === 'things') return head + thingsSection();
   if (S.itemsTab === 'world') return head + worldSection();
   if (S.itemsTab === 'stations') return head + stationsSection();
   if (S.itemsTab === 'resources') return head + resourcesSection();
@@ -4320,7 +4529,7 @@ function codeScopes(){
   const out = [['world', 'World pieces'], ['terrain', 'Terrain']];
   if (S.sel.size) out.unshift(['sel', `Selected (${S.sel.size})`]);
   for (const [id, p] of Object.entries(doc.prefabs)) out.push(['pf:' + id, 'Prefab: ' + p.name]);
-  out.push(['items', 'Items'], ['recipes', 'Recipes'], ['stations', 'Stations'], ['resources', 'Resources'], ['crops', 'Crops'], ['npcs', 'People'], ['quests', 'Quests'], ['shops', 'Shops'], ['spells', 'Spells'], ['areas', 'Areas'], ['skills', 'Skills'], ['dialogues', 'Talk'], ['rules', 'Rules'], ['start', 'Start'], ['monsters', 'Creatures'], ['textures', 'Textures'], ['palette', 'Palette'], ['scene', 'Whole scene']);
+  out.push(['items', 'Items'], ['recipes', 'Recipes'], ['stations', 'Stations'], ['resources', 'Resources'], ['crops', 'Crops'], ['npcs', 'People'], ['quests', 'Quests'], ['shops', 'Shops'], ['spells', 'Spells'], ['areas', 'Areas'], ['things', 'Things'], ['skills', 'Skills'], ['dialogues', 'Talk'], ['rules', 'Rules'], ['start', 'Start'], ['monsters', 'Creatures'], ['textures', 'Textures'], ['palette', 'Palette'], ['scene', 'Whole scene']);
   return out;
 }
 const KIND_LIST = () => Object.keys(KINDS).join(', ') + ', prefab';
@@ -4334,9 +4543,10 @@ function codeHeader(sc){
   if (sc === 'npcs') return `// People by id: name, model (prefab), lines, quest id, shop id, wander. Place them with kind "npcspot" and opt.npc.\n`;
   if (sc === 'quests') return `// Quests by id: giver, requires ["flag:x", "!flag:x", "quest:id"], intro and done lines, reward { items, xp, spells }.\n// steps: { type: bring|kill|talk|choice|finish, item, creature, npc, count, hint, say, next (1-based step to go to), options [{ label, next, flag }], flag, reward }.\n`;
   if (sc === 'spells') return `// Spells by id: kind (bolt, heal, light, shield, levitate, teleport), lvl, cost (magicka), power, dur (seconds), xp, look (texture).\n`;
+  if (sc === 'things') return `// Things by id: name, desc, icon, comps [ blocks ]. Blocks: { t: carry, stack, value } { t: use, label, consume, fail, conds, actions } { t: body, model }\n// { t: grow, seed, time, lvl, xp, soil } { t: produce, item, n, every, max, verb, skill, xp } { t: light } { t: aura, radius, every, conds, actions } { t: storage } { t: station, id } { t: tap, label, fail, conds, actions }\n`;
   if (sc === 'skills') return `// Your skills by id: name, desc. They level like built-in ones; use the id in recipes, resources, rules and quests.\n`;
   if (sc === 'dialogues') return `// Conversations by id: name, speaker, nodes { id: { text, next, actions [...], choices [{ label, to, conds [...], actions [...] }] } }. The first node starts.\n`;
-  if (sc === 'rules') return `// Rules: [{ name, on: use|tap|enter|kill|level|gather|make|start, target, label, fail, once, conds [...], actions [...] }]\n// conds: { t: has|flag|noflag|var|level|quest|area|wearing|night|chance, id, n, op, state }\n// actions: { t: say|give|take|xp|flag|unflag|var|heal|hurt|mp|teleport|home|quest|spell|talk|spawn|sound, id, n, op, text }\n`;
+  if (sc === 'rules') return `// Rules: [{ name, on: use|tap|enter|kill|level|gather|make|start, target, label, fail, once, conds [...], actions [...] }]\n// conds: { t: has|flag|noflag|var|level|quest|area|wearing|night|chance, id, n, op, state }\n// actions: { t: say|give|take|xp|flag|unflag|var|heal|hurt|mp|teleport|home|quest|spell|talk|spawn|sound|boost|speed|regen|poison|cure|glow|levitate, id, n, op, text, dur }\n`;
   if (sc === 'areas') return `// Areas by one-character key (painted into terrain.areas): name, min and max danger level, dark.\n`;
   if (sc === 'shops') return `// Shops by id: stock [[item, price]], buyRate (share of an item's value they pay).\n`;
   if (sc === 'start') return `// The starting kit for a new game: items [[item, count]].\n`;
@@ -4358,7 +4568,7 @@ function scopeGet(sc){
   if (sc === 'monsters') return doc.monsters;
   if (sc === 'items') return doc.items;
   if (sc === 'recipes') return doc.recipes;
-  if (['crops', 'npcs', 'quests', 'shops', 'start', 'spells', 'areas', 'skills', 'dialogues', 'rules'].includes(sc)) return doc[sc];
+  if (['crops', 'npcs', 'quests', 'shops', 'start', 'spells', 'areas', 'skills', 'dialogues', 'rules', 'things'].includes(sc)) return doc[sc];
   if (sc === 'stations') return doc.stations;
   if (sc === 'resources') return doc.resources;
   if (sc === 'palette') return doc.palette;
@@ -4380,7 +4590,7 @@ function scopeSet(sc, val){
   else if (sc.startsWith('pf:')){ need(isObj(val), 'A prefab should be an object: { name, items }'); c.prefabs[sc.slice(3)] = val; }
   else if (sc === 'items'){ need(isObj(val), 'Items should be an object of named items'); c.items = val; }
   else if (sc === 'rules'){ need(Array.isArray(val), 'This should be a list: [ … ]'); c.rules = val; }
-  else if (['crops', 'npcs', 'quests', 'shops', 'start', 'spells', 'areas', 'skills', 'dialogues'].includes(sc)){ need(isObj(val), 'This should be an object: { … }'); c[sc] = val; }
+  else if (['crops', 'npcs', 'quests', 'shops', 'start', 'spells', 'areas', 'skills', 'dialogues', 'things'].includes(sc)){ need(isObj(val), 'This should be an object: { … }'); c[sc] = val; }
   else if (sc === 'stations'){ need(isObj(val), 'Stations should be an object of named stations'); c.stations = val; }
   else if (sc === 'resources'){ need(isObj(val), 'Resources should be an object of named resources'); c.resources = val; }
   else if (sc === 'recipes'){ need(Array.isArray(val), 'Recipes should be a list: [ … ]'); c.recipes = val; }
@@ -4901,6 +5111,7 @@ function modelSheet(){
 }
 function renderSheet(){
   if (areaMesh && (S.tool !== 'land' || S.land.mode !== 'area')) areaOverlay();
+  const chatFocus = document.activeElement && document.activeElement.id === 'chatIn';
   const body = $('#sheetBody'), keep = {};
   const ta0 = $('#codeTa'); if (ta0){ S.code.selr = [ta0.selectionStart, ta0.selectionEnd]; S.code.scroll = [ta0.scrollTop, ta0.scrollLeft]; }
   body.querySelectorAll('[data-keep]').forEach(el => { keep[el.dataset.keep] = el.scrollLeft; });
@@ -4914,6 +5125,8 @@ function renderSheet(){
   if (S.tool === 'code') bindCode();
   if (S.tool === 'walk' || S.tool === 'items') drawIcons(body);
   const mc = $('#mapCv'); if (mc){ drawMap(mc); mc.onpointerup = e => mapTap(e, mc); }
+  const ci = $('#chatIn'); if (ci){ ci.oninput = () => { S.chatDraft = ci.value; }; ci.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); A['chat-send'](); } }; if (chatFocus){ ci.focus(); const L = ci.value.length; ci.setSelectionRange(L, L); } }
+  const cl = $('#chatLog'); if (cl) cl.scrollTop = cl.scrollHeight;
   if (S.tool === 'items'){
     body.querySelectorAll('select[data-rc-add]').forEach(sel => { sel.onchange = () => { const r = doc.recipes[+sel.dataset.rcAdd]; if (!r || !sel.value) return; const ex = r.needs.find(n => n[0] === sel.value); if (ex) ex[1]++; else r.needs.push([sel.value, 1]); commit(); renderSheet(); }; });
     body.querySelectorAll('select[data-set]').forEach(el => { el.onchange = () => {
@@ -4926,9 +5139,11 @@ function renderSheet(){
       }
       commit(); renderSheet();
     }; });
+    body.querySelectorAll('select[data-th-add]').forEach(el => { el.onchange = () => { const th = doc.things[el.dataset.thAdd]; if (!th || !el.value || !COMPS[el.value]) return; th.comps.push(COMPS[el.value].make()); commit(); renderSheet(); }; });
+    body.querySelectorAll('select[data-th-new]').forEach(el => { el.onchange = () => { const v = el.value; el.value = ''; if (v) newThing(v); }; });
     body.querySelectorAll('select[data-obj-add]').forEach(el => { el.onchange = () => {
       if (!el.value) return; const L = pathGet(el.dataset.objAdd); if (!L) return;
-      L.push({ t: el.value, id: '', n: 1, op: el.dataset.kind === 'cond' ? '>=' : '+', text: '', state: 'done' }); commit(); renderSheet();
+      L.push({ t: el.value, id: el.value === 'boost' ? 'str' : '', n: el.value === 'speed' ? 30 : 1, op: el.dataset.kind === 'cond' ? '>=' : '+', text: '', state: 'done', dur: 30 }); commit(); renderSheet();
     }; });
     body.querySelectorAll('select[data-str-add]').forEach(el => { el.onchange = () => { if (!el.value) return; const L = pathGet(el.dataset.strAdd); if (!L || L.includes(el.value)) return; L.push(el.value); commit(); renderSheet(); }; });
     body.querySelectorAll('select[data-lst-add]').forEach(el => { el.onchange = () => {
@@ -5079,7 +5294,7 @@ function wearLook(g, id){ // repaint a held model's head in the item's look
   const d = id && doc.items[id], look = d && d.look && d.look !== 'metal' ? d.look : id === 'crystalsword' ? 'crystal' : /bronze|bone/.test(id || '') ? 'rust' : 'metal';
   h.material = [getMat(tdef(look) ? look : 'metal')];
 }
-function makePlayer(){
+function makePlayer(own){
   const g = new THREE.Group();
   const legL = part(.16, .5, .18, 'bark', -.5), legR = part(.16, .5, .18, 'bark', -.5);
   legL.position.set(-.1, .5, 0); legR.position.set(.1, .5, 0);
@@ -5102,7 +5317,9 @@ function makePlayer(){
   const backBow = toolModel('bow'); backBow.position.set(.1, .95, -.17); backBow.rotation.z = 2.7;
   const backStaff = toolModel('staff'); backStaff.position.set(.12, .7, -.17); backStaff.rotation.z = .35;
   g.add(legL, legR, body, armL, armR, head, hair, helm, plate, packM, hipAxe, hipPick, backSword, backBow, backStaff);
-  P.parts = { legL, legR, armL, armR, rod, sword, shield, helm, plate, grL, grR, packM, held, hipAxe, hipPick, backSword, backBow, backStaff };
+  const parts = { legL, legR, armL, armR, rod, sword, shield, helm, plate, grL, grR, packM, held, hipAxe, hipPick, backSword, backBow, backStaff, body };
+  if (own !== false) P.parts = parts;
+  g.userData.parts = parts;
   return g;
 }
 function makeMarker(){
@@ -5276,7 +5493,7 @@ function fitInv(){
   }
 }
 const VALUE = { net: 5, bucket: 2, water: 3, shrimp: 3, sardine: 5, trout: 12, pike: 20, shrimp_c: 5, sardine_c: 7, trout_c: 15, pike_c: 24, axe: 15, tinderbox: 4, logs: 4, seeds: 1, grain: 2, flour: 6, dough: 8, bread: 12, sword: 25, shield: 20, bones: 2, rawrat: 2, meat: 5 };
-const itemValue = id => doc.items[id] ? doc.items[id].value : (VALUE[id] || 0);
+const itemValue = id => doc.items[id] ? doc.items[id].value : doc.things && doc.things[id] && comp(doc.things[id], 'carry') ? comp(doc.things[id], 'carry').value : (VALUE[id] || 0);
 const EQUIP = { sword: { slot: 'weapon', acc: 4, str: 3 }, shield: { slot: 'shield', def: 4 } };
 const wield = ['Wield', i => {
   const id = G.inv[i], e = EQUIP[id], sl = e.slot, old = G.equip[sl];
@@ -5353,6 +5570,11 @@ function refreshItems(){
     use.push(drop);
     ITEMS[id] = { name: d.name, desc: d.desc || 'Something you made.', icon: d.icon, stack: d.stack, use, custom: true };
   }
+  for (const [id, th] of Object.entries(doc.things || {})){ // things with a Carry block are items too
+    const c = comp(th, 'carry'); if (!c || BASE.items.has(id) || (doc.items || {})[id]) continue;
+    const u = comp(th, 'use'), use = u ? [[u.label || 'Use', i => useThing(i, id)], drop] : [drop];
+    ITEMS[id] = { name: th.name, desc: th.desc || 'Something you made.', icon: th.icon, stack: c.stack, use, custom: true };
+  }
   if (gReady){ // anything that no longer exists falls out of your bag
     G.inv.forEach((id, i) => { if (id && !ITEMS[id]){ G.inv[i] = null; G.qty[i] = 0; } });
     for (const sl of SLOTS) if (G.equip[sl] && !ITEMS[G.equip[sl]]) G.equip[sl] = null;
@@ -5370,7 +5592,7 @@ function refreshSkills(){ // built-in skills first, then the ones you made
 const levelOf = xp => { let l = 1; while (l < 99 && xp >= XP_AT[l + 1]) l++; return l; };
 const SKILLS = [['attack', 'Attack'], ['strength', 'Strength'], ['defence', 'Defence'], ['hitpoints', 'Hitpoints'], ['ranged', 'Ranged'], ['magic', 'Magic'], ['prayer', 'Prayer'], ['crafting', 'Crafting'], ['mining', 'Mining'], ['smithing', 'Smithing'],
   ...[['fishing', 'Fishing'], ['cooking', 'Cooking'], ['woodcutting', 'Woodcutting'], ['firemaking', 'Firemaking'], ['farming', 'Farming'], ['swimming', 'Swimming']]];
-const G = { v: 9, vars: {}, done: {}, belt: [], bank: [], pp: 1, pray: {}, quests: {}, flags: {}, spells: ['firebolt'], mp: 7, autocast: 'firebolt', dayT: .35, ground: [], boxes: {}, hp: 10, style: 'accurate', autoRet: true, equip: { weapon: 'sword', shield: 'shield', head: null, body: null, legs: null }, inv: ['axe', 'tinderbox', 'net', 'bucket', 'bucket', 'seeds', 'bronzepick'], qty: [1, 1, 1, 1, 1, 6, 1], crops: {}, xp: { attack: 0, strength: 0, defence: 0, hitpoints: 1154, prayer: 0, ranged: 0, magic: 0, crafting: 0, mining: 0, smithing: 0, fishing: 0, cooking: 0, woodcutting: 0, firemaking: 0, farming: 0, swimming: 0 } };
+const G = { v: 9, vars: {}, done: {}, plants: {}, things: {}, belt: [], bank: [], pp: 1, pray: {}, quests: {}, flags: {}, spells: ['firebolt'], mp: 7, autocast: 'firebolt', dayT: .35, ground: [], boxes: {}, hp: 10, style: 'accurate', autoRet: true, equip: { weapon: 'sword', shield: 'shield', head: null, body: null, legs: null }, inv: ['axe', 'tinderbox', 'net', 'bucket', 'bucket', 'seeds', 'bronzepick'], qty: [1, 1, 1, 1, 1, 6, 1], crops: {}, xp: { attack: 0, strength: 0, defence: 0, hitpoints: 1154, prayer: 0, ranged: 0, magic: 0, crafting: 0, mining: 0, smithing: 0, fishing: 0, cooking: 0, woodcutting: 0, firemaking: 0, farming: 0, swimming: 0 } };
 let GVER = 99; // the version of the save we loaded (99 = no save yet)
 try {
   const g = JSON.parse(localStorage.getItem(GKEY) || 'null');
@@ -5390,6 +5612,8 @@ try {
   if (g && (g.v || 1) < 3 && !g.inv.includes('seeds')){ const k = G.inv.findIndex(x => !x); if (k >= 0){ G.inv[k] = 'seeds'; G.qty[k] = 6; } }
   if (g && g.xp){ for (const [k, v] of Object.entries(g.xp)) if (/^[a-z0-9_]+$/.test(k)) G.xp[k] = Math.max(0, +v || 0); SKILLS.forEach(([k]) => { G.xp[k] = Math.max(0, +g.xp[k] || (k === 'hitpoints' ? 1154 : 0)); }); }
   if (g && g.vars && typeof g.vars === 'object') G.vars = g.vars;
+  if (g && g.plants && typeof g.plants === 'object') G.plants = g.plants;
+  if (g && g.things && typeof g.things === 'object') G.things = g.things;
   if (g && g.done && typeof g.done === 'object') G.done = g.done;
   if (g && g.equip && typeof g.equip === 'object') G.equip = Object.fromEntries(SLOTS.map(sl => [sl, g.equip[sl] || null]));
   if (g && ['accurate', 'aggressive', 'defensive'].includes(g.style)) G.style = g.style;
@@ -5500,8 +5724,15 @@ function interactions(h){
     if (!to) return { opts: [], note: 'This portal leads nowhere yet.' };
     return { opts: [{ id: 'portal', label: `Step through to ${to}` }], title: it.opt.name || 'Portal', tp: V(it.pos[0], it.pos[1], it.pos[2]), extra: { to } };
   }
+  if (h.ud.remote){
+    const pl = NET.players.get(h.ud.remote); if (!pl) return { opts: [] };
+    const opts = [{ label: `Give ${pl.name} something`, menu: true, now: () => A['net-give']({ dataset: { id: pl.id } }) }, { label: pl.muted ? 'Unmute' : 'Mute', menu: true, now: () => A['net-mute']({ dataset: { id: pl.id } }) }];
+    if (NET.role === 'host') opts.push({ label: 'Remove from the world', menu: true, now: () => A['net-kick']({ dataset: { id: pl.id } }) });
+    return { opts, title: pl.name, tp: pl.obj.position.clone() };
+  }
   if (h.ud.npc){ const n = h.ud.npc, sh = n.def.shop && doc.shops[n.def.shop]; const opts = [{ id: 'talk', label: `Talk to ${n.def.name}` }]; if (sh) opts.push({ id: 'trade', label: 'Trade' }); return { opts, title: n.def.name, tp: n.pos.clone(), extra: { npc: n } }; }
   if (h.ud.mob){ const m = h.ud.mob; if (m.dead) return { opts: [] }; return { opts: [{ id: 'attack', label: `Attack ${m.def.name} (level ${mobLevel(m.def)})` }], title: m.def.name, tp: m.pos.clone(), extra: { mob: m } }; }
+  { const th = thingAt(h); if (th){ const r = thingInteractions(th); if (r.opts.length || r.note) return r; if (th.planted || act === 'auto') return { opts: [], note: th.def.desc || th.def.name }; } }
   if (h.ud.groundItem){
     const gi = h.ud.groundItem, pile = G.ground.filter(g => ITEMS[g.id] && Math.hypot(g.x - gi.x, g.z - gi.z) < 1.1);
     const label = g => `Take ${(g.qty > 1 ? g.qty + ' ' : '') + ITEMS[g.id].name.toLowerCase()}`;
@@ -5535,10 +5766,12 @@ function interactions(h){
   const soil = h.ud.crop || act === 'farm' || (tid && baseTex(tid) === 'soil');
   if (soil){
     const key = h.ud.crop || tileKey(h.point), c = G.crops[key], at = tileCenter(key), cd = cropDef(c);
+    if (G.plants['tile:' + key]){ const th = thingByKey('tile:' + key, true); if (th) return thingInteractions(th); }
     if (!c || !cd){
       const can = Object.entries(doc.crops).filter(([, x]) => G.inv.includes(x.seed));
-      if (!can.length) return { opts: [], note: Object.keys(doc.crops).length ? 'You have no seeds to plant.' : 'Nothing grows here yet.' };
-      return { opts: can.map(([cid, x]) => ({ id: 'plant', label: `Plant ${x.name.toLowerCase()}`, extra: { tile: key, crop: cid } })), title: 'Farm patch', tp: at, extra: { tile: key } };
+      const canT = Object.entries(doc.things).filter(([, th]) => { const g2 = comp(th, 'grow'); return g2 && g2.soil && G.inv.includes(g2.seed); });
+      if (!can.length && !canT.length) return { opts: [], note: Object.keys(doc.crops).length ? 'You have no seeds to plant.' : 'Nothing grows here yet.' };
+      return { opts: can.map(([cid, x]) => ({ id: 'plant', label: `Plant ${x.name.toLowerCase()}`, extra: { tile: key, crop: cid } })).concat(canT.map(([tid2, th]) => ({ id: 'plantthing', label: `Plant ${th.name.toLowerCase()}`, extra: { tile: key, thing: tid2 } }))), title: 'Farm patch', tp: at, extra: { tile: key } };
     }
     if (cropStage(c) < 3) return { opts: [], note: `The ${cd.name.toLowerCase()} is still growing (about ${fmtTime(cropLeft(c))} left).` };
     return { opts: [{ id: 'harvest', label: `Harvest the ${cd.name.toLowerCase()}` }], title: cd.name, tp: at, extra: { tile: key } };
@@ -5656,7 +5889,14 @@ function updateCrops(force){
 /* ---------- combat ---------- */
 const lv = k => levelOf(G.xp[k]);
 const maxHp = () => lv('hitpoints');
-const bonus = k => SLOTS.reduce((n, sl) => n + ((EQUIP[G.equip[sl]] || {})[k] || 0), 0) + prayBonus(k);
+const bonus = k => SLOTS.reduce((n, sl) => n + ((EQUIP[G.equip[sl]] || {})[k] || 0), 0) + prayBonus(k) + buffBonus(k);
+var BUFFS = [], buffT = 0; // timed effects from things you eat, drink or stand near
+function buffBonus(k){ if (!BUFFS || !BUFFS.length) return 0; const t = performance.now() / 1000; return BUFFS.reduce((sm, b) => sm + (b.k === k && b.until > t ? b.n : 0), 0); }
+function buffSummary(){
+  const t = performance.now() / 1000, NM = { acc: 'Accuracy', str: 'Strength', def: 'Defence', mag: 'Magic', speed: 'Speed', regen: 'Healing', poison: 'Poisoned' }, out = new Map();
+  (BUFFS || []).forEach(b => { if (b.until <= t) return; const left = Math.ceil(b.until - t), cur = out.get(b.k); out.set(b.k, Math.max(cur || 0, left)); });
+  return [...out].map(([k, left]) => `${NM[k] || k}${['acc', 'str', 'def', 'mag'].includes(k) ? ' +' + buffBonus(k) : ''} ${left}s`).join(' · ');
+}
 function combatLevel(){ return Math.floor(.25 * (lv('defence') + lv('hitpoints') + Math.floor(lv('prayer') / 2)) + .325 * (lv('attack') + lv('strength'))); }
 const mobLevel = d => Math.max(1, Math.floor(.25 * (d.defence + d.hp) + .325 * (d.attack + d.strength)));
 let MOBS = [], NPCS = [], regenT = 0;
@@ -5889,7 +6129,13 @@ function castSpell(id){
   saveGame(); renderSheet();
 }
 function regen(dt){
-  regenT += dt; mpT += dt;
+  regenT += dt; mpT += dt; buffT += dt;
+  if (buffT >= 2 && BUFFS.length){ // effects that tick: healing and poison
+    buffT = 0; const t = performance.now() / 1000; BUFFS = BUFFS.filter(b => b.until > t);
+    const r = buffBonus('regen'), pz = buffBonus('poison');
+    if (r && G.hp < maxHp()){ G.hp = Math.min(maxHp(), G.hp + r); splat(P.pos.clone().add(V(0, 1.2, 0)), '+' + r, 'heal'); }
+    if (pz){ G.hp = Math.max(0, G.hp - pz); splat(P.pos.clone().add(V(0, 1.1, 0)), String(pz), ''); sfx('hurt'); if (G.hp <= 0){ BUFFS = []; playerDie(); return; } }
+  }
   const dr = PRAYERS.reduce((sm, p2) => sm + (G.pray[p2.id] ? p2.drain : 0), 0);
   if (dr){ G.pp -= dr * dt; if (G.pp <= 0){ G.pp = 0; G.pray = {}; toast('You have run out of prayer points. Pray at an altar to recharge.'); renderSheet(); } }
   if (regenT >= (G.pray.heal ? 3 : 6)){ regenT = 0; if (!inCombat() && G.hp < maxHp()){ G.hp++; saveGame(); } }
@@ -5962,9 +6208,10 @@ function updateHud(){
   hud.hidden = !on; if (!on){ hudLast = ''; return; }
   const T = P.task, foe = T && T.type === 'fight' && T.mob && !T.mob.dead ? T.mob : MOBS.find(m => m.target === 'player' && !m.dead);
   const lev = isFlying() ? Math.ceil(P.levUntil - nowS()) : 0, area = doc.areas[P.area];
-  const key = [G.hp, maxHp(), G.mp, maxMp(), Math.ceil(G.pp), Object.keys(G.pray).length, combatLevel(), foe ? foe.def.name + foe.hp : '', clock(), lev, P.area].join('|');
+  const fxs = buffSummary();
+  const key = [fxs, G.hp, maxHp(), G.mp, maxMp(), Math.ceil(G.pp), Object.keys(G.pray).length, combatLevel(), foe ? foe.def.name + foe.hp : '', clock(), lev, P.area].join('|');
   if (key === hudLast) return; hudLast = key;
-  hud.innerHTML = `<div class="orb hp"><b>HP</b> ${G.hp}/${maxHp()}</div><div class="orb" style="color:#6a7fd6"><b>MP</b> ${G.mp}/${maxMp()}</div>${Object.keys(G.pray).length || G.pp < maxPp() ? `<div class="orb" style="color:#d8c26a"><b>PR</b> ${Math.ceil(G.pp)}/${maxPp()}</div>` : ''}<div class="orb">Combat ${combatLevel()}</div><div class="orb">${S.inDark ? 'Underground' : (nightF > .5 ? 'Night' : 'Day') + ' ' + clock()}</div>${area ? `<div class="orb">${esc(area.name)}</div>` : ''}${lev ? `<div class="orb" style="color:#9a7ac4">Levitating ${lev}s</div>` : ''}${foe ? `<div class="orb foe">${esc(foe.def.name)} ${Math.max(0, foe.hp)}/${foe.def.hp}</div>` : ''}`;
+  hud.innerHTML = `<div class="orb hp"><b>HP</b> ${G.hp}/${maxHp()}</div><div class="orb" style="color:#6a7fd6"><b>MP</b> ${G.mp}/${maxMp()}</div>${Object.keys(G.pray).length || G.pp < maxPp() ? `<div class="orb" style="color:#d8c26a"><b>PR</b> ${Math.ceil(G.pp)}/${maxPp()}</div>` : ''}<div class="orb">Combat ${combatLevel()}</div><div class="orb">${S.inDark ? 'Underground' : (nightF > .5 ? 'Night' : 'Day') + ' ' + clock()}</div>${area ? `<div class="orb">${esc(area.name)}</div>` : ''}${lev ? `<div class="orb" style="color:#9a7ac4">Levitating ${lev}s</div>` : ''}${fxs ? `<div class="orb" style="color:#7cc4a0">${esc(fxs)}</div>` : ''}${foe ? `<div class="orb foe">${esc(foe.def.name)} ${Math.max(0, foe.hp)}/${foe.def.hp}</div>` : ''}`;
 }
 /* ---------- day and night ---------- */
 // [time, sky (-1 = the theme's sky), sky light, sky light color, ground light color, sun strength, sun color]
@@ -6001,13 +6248,14 @@ function updateDay(dt){
 }
 function collectGlow(){
   glowSpots = []; worldGroup.updateMatrixWorld(true);
+  doc.world.items.forEach(it => { if (S.ctx === 'world' && it.thing && doc.things[it.thing] && comp(doc.things[it.thing], 'light')) glowSpots.push(V(it.pos[0], it.pos[1] + .9, it.pos[2])); });
   worldGroup.traverse(o => {
     const it = o.isMesh && o.userData.item; if (!it || MARKERS.has(it.kind) || !o.userData.roles) return;
     if (o.userData.roles.some(r => baseTex(texFor(it, r)) === 'fire')) glowSpots.push(o.getWorldPosition(V())); // firelight only from fire
   });
 }
 function updateFireLights(secs){
-  const spots = S.ctx === 'world' ? glowSpots.concat(FIRES.map(f => f.g.position)) : [];
+  const spots = S.ctx === 'world' ? glowSpots.concat(FIRES.map(f => f.g.position), plantLights) : [];
   const t = camS.target, near = spots.map(p => [p, (p.x - t.x) ** 2 + (p.z - t.z) ** 2]).sort((a, b) => a[1] - b[1]);
   fireLights.forEach((l, k) => {
     if (!near[k] || near[k][1] > 900){ l.intensity = 0; return; }
@@ -6017,7 +6265,7 @@ function updateFireLights(secs){
 }
 const clock = () => { const h = dayTime() * 24, hh = Math.floor(h), mm = Math.floor((h - hh) * 6) * 10; return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`; };
 function setMode(m){
-  if (m === S.mode || (GAME && m === 'create')) return;
+  if (m === S.mode || ((GAME || JOIN) && m === 'create')) return;
   if (m === 'play'){
     if (S.ctx !== 'world') A['ctx-done']();
     S.createTool = S.tool; S.mode = 'play'; document.documentElement.classList.add('play');
@@ -6099,7 +6347,7 @@ function condOk(c){
   return true;
 }
 const condsOk = cs => (cs || []).every(condOk);
-function runActions(as){
+function runActions(as, quiet){
   for (const a of as || []){
     const n = +a.n || 0;
     switch (a.t){
@@ -6120,9 +6368,16 @@ function runActions(as){
       case 'talk': if (doc.dialogues[a.id]) setTimeout(() => openDialogue(a.id), 60); break;
       case 'spawn': summon(a.id, Math.max(1, n)); break;
       case 'sound': sfx(a.id); break;
+      case 'boost': BUFFS.push({ k: ['acc', 'str', 'def', 'mag'].includes(a.id) ? a.id : 'str', n, until: nowS() + (+a.dur || 30) }); break;
+      case 'speed': BUFFS.push({ k: 'speed', n, until: nowS() + (+a.dur || 30) }); break;
+      case 'regen': BUFFS.push({ k: 'regen', n, until: nowS() + (+a.dur || 30) }); break;
+      case 'poison': BUFFS.push({ k: 'poison', n, until: nowS() + (+a.dur || 30) }); break;
+      case 'cure': BUFFS = BUFFS.filter(b => b.k !== 'poison'); break;
+      case 'glow': P.glowUntil = Math.max(P.glowUntil || 0, nowS()) + (+a.dur || 60); break;
+      case 'levitate': P.levUntil = nowS() + (+a.dur || 20); P.path = []; break;
     }
   }
-  saveGame(); renderSheet();
+  saveGame(); if (!quiet) renderSheet();
 }
 function fireRules(on, target){
   for (const r of doc.rules){
@@ -6154,6 +6409,352 @@ function openDialogue(did, n){
   const D = doc.dialogues[did]; if (!D) return;
   closePanels(); n = n || { def: { name: D.speaker || D.name }, talking: false };
   S.talk = { n, pages: dlgPages(did), i: 0, at: P.pos.clone() }; n.talking = true; S.gameTab = 'bag'; S.sheetOpen = true; renderTop(); renderSheet();
+}
+/* ---------- playing together: one person hosts, friends join with a code ---------- */
+// Star network over WebRTC (PeerJS): guests talk only to the host, and the host passes messages on.
+// The host sends the world; everyone sends where they are; chat, gifts, falling trees and fires are shared.
+var NET = { role: '', peer: null, conns: new Map(), host: null, code: '', hostName: '', players: new Map(), chat: [], sendT: 0, wasMoving: false, status: '', got: false, me: { said: '', until: 0, tag: null } };
+const NET_PREFIX = 'pixelwright-', PEER_SRC = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', NET_MAX = 8;
+const SHIRTS = ['cloth', 'dress', 'robe', 'apron', 'trollskin', 'chitin', 'fur'];
+function loadPeer(){
+  if (window.Peer) return Promise.resolve();
+  return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = PEER_SRC; sc.onload = () => window.Peer ? res() : rej(new Error('no Peer')); sc.onerror = () => rej(new Error('blocked')); document.head.appendChild(sc); });
+}
+function newCode(){ const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c = ''; for (let k = 0; k < 6; k++) c += A[Math.floor(Math.random() * A.length)]; return c; }
+const myName = () => (S.netName || 'Adventurer').slice(0, 20);
+async function askName(){ const v = await dialog({ title: 'Your name', msg: 'Other players see it above your head.', input: S.netName || '', okLabel: 'Save', max: 20 }); if (v == null) return false; S.netName = v.trim().slice(0, 20) || 'Adventurer'; savePrefs(); return true; }
+function netSend(m){
+  if (NET.role === 'host') NET.conns.forEach(c => { if (c.open !== false) c.send(m); });
+  else if (NET.role === 'guest' && NET.host) NET.host.send(m);
+}
+function netBroadcast(m, except){ NET.conns.forEach((c, id) => { if (id !== except && c.open !== false) c.send(m); }); }
+const myPos = () => ({ id: NET.peer ? NET.peer.id : '', n: myName(), x: +P.pos.x.toFixed(2), y: +(P.pos.y - (P.sink || 0)).toFixed(2), z: +P.pos.z.toFixed(2), f: +P.facing.toFixed(2), m: P.path.length ? 1 : 0, s: G.equip.body || G.equip.head ? 1 : 0 });
+function netSendPos(){ if (NET.role && NET.peer && P.obj && S.mode === 'play') netSend(Object.assign({ t: 'pos' }, myPos())); }
+async function startHosting(){
+  if (NET.role) return;
+  if (!S.netName && !await askName()) return;
+  if (!S.hostCode){ S.hostCode = newCode(); savePrefs(); }
+  NET.status = 'Starting…'; renderSheet();
+  try { await loadPeer(); } catch (e){ NET.status = ''; renderSheet(); toast('Couldn’t load the connection library. Check your internet connection.'); return; }
+  const peer = new Peer(NET_PREFIX + S.hostCode.toLowerCase()); NET.peer = peer;
+  peer.on('open', () => { NET.role = 'host'; NET.code = S.hostCode; NET.status = ''; toast(`Hosting! Friends join with the code ${NET.code}.`); sfx('portal'); renderSheet(); netSendPos(); });
+  peer.on('connection', conn => {
+    conn.on('open', () => {
+      if (NET.conns.size >= NET_MAX - 1){ conn.send({ t: 'full' }); setTimeout(() => conn.close(), 400); return; }
+      NET.conns.set(conn.peer, conn);
+      conn.send({ t: 'world', doc: JSON.stringify(doc), code: NET.code, host: myName() });
+      if (P.obj) conn.send(Object.assign({ t: 'pos' }, myPos()));
+      NET.players.forEach(pl => conn.send({ t: 'pos', id: pl.id, n: pl.name, x: pl.tx, y: pl.ty, z: pl.tz, f: pl.tf, m: 0 }));
+      const now = performance.now() / 1000;
+      FELLED.forEach((f, id) => { if (f.at) conn.send({ t: 'felled', id, secs: Math.max(1, f.until - now), tex: f.tex || '', size: f.size || null, x: f.at.x, y: f.at.y, z: f.at.z }); });
+    });
+    conn.on('data', d => netData(d, conn.peer));
+    conn.on('close', () => netLeft(conn.peer));
+    conn.on('error', () => netLeft(conn.peer));
+  });
+  peer.on('error', e => {
+    const t = e && e.type;
+    toast(t === 'unavailable-id' ? 'This world is already being hosted, maybe in another tab.' : t === 'network' || t === 'server-error' || t === 'socket-error' ? 'Couldn’t reach the connection server.' : 'Hosting stopped (' + (t || 'error') + ').');
+    if (!NET.role || t === 'unavailable-id' || t === 'server-error') stopNet();
+  });
+  peer.on('disconnected', () => { try { if (NET.role === 'host') peer.reconnect(); } catch (e){} });
+}
+function stopNet(){
+  if (NET.role === 'host'){ netBroadcast({ t: 'end' }); }
+  try { NET.peer && NET.peer.destroy(); } catch (e){}
+  [...NET.players.keys()].forEach(removePlayer);
+  if (NET.me.tag){ NET.me.tag.remove(); NET.me.tag = null; }
+  Object.assign(NET, { role: '', peer: null, conns: new Map(), host: null, code: '', status: '', chat: [] });
+  renderSheet();
+}
+// the screen a guest sees until the host's world arrives
+function joinScreen(msg, busy){
+  let el = $('#netOverlay'); if (!el){ el = document.createElement('div'); el.id = 'netOverlay'; document.body.appendChild(el); }
+  el.hidden = false;
+  el.innerHTML = `<div><h1>World ${esc(JOIN)}</h1><p>${esc(msg || 'You’re joining a friend’s world. Your progress there is kept separate from your own world.')}</p>
+    ${busy ? '' : `<input id="njName" type="text" maxlength="20" placeholder="Your name" value="${esc(S.netName || '')}" aria-label="Your name"><div class="row"><button class="btn primary" data-nj="go">${msg ? 'Try again' : 'Join'}</button></div>`}
+    <div class="row" style="margin-top:10px"><button class="btn" data-nj="back">Back to my own world</button></div></div>`;
+  el.onclick = e => {
+    const b = e.target.closest('[data-nj]'); if (!b) return; audioInit();
+    if (b.dataset.nj === 'back'){ location.href = location.pathname; return; }
+    const nm = ($('#njName') || {}).value; S.netName = (nm || '').trim().slice(0, 20) || 'Adventurer'; savePrefs(); startJoin();
+  };
+}
+function joinFailed(msg){ try { NET.peer && NET.peer.destroy(); } catch (e){} NET.role = ''; NET.peer = null; NET.host = null; NET.got = false; joinScreen(msg); }
+async function startJoin(){
+  joinScreen('Connecting…', true);
+  try { await loadPeer(); } catch (e){ joinFailed('Couldn’t load the connection library. Check your internet connection.'); return; }
+  const peer = new Peer(); NET.peer = peer;
+  const timer = setTimeout(() => { if (!NET.got) joinFailed('No answer from the host. Check the code, and that your friend is still hosting.'); }, 25000);
+  peer.on('open', () => {
+    const conn = peer.connect(NET_PREFIX + JOIN.toLowerCase(), { reliable: true, metadata: { name: myName() } }); NET.host = conn;
+    conn.on('open', () => { NET.role = 'guest'; NET.code = JOIN; conn.send({ t: 'hello', n: myName() }); if (!NET.got) joinScreen('Receiving the world…', true); });
+    conn.on('data', d => netData(d, conn.peer));
+    conn.on('close', () => { clearTimeout(timer); if (NET.role === 'guest' || NET.got) joinFailed('The connection to the host closed.'); });
+  });
+  peer.on('error', e => { clearTimeout(timer); const t = e && e.type; joinFailed(t === 'peer-unavailable' ? `Nobody is hosting a world with the code ${JOIN} right now.` : t === 'browser-incompatible' ? 'This browser can’t make player-to-player connections.' : 'Couldn’t connect (' + (t || 'error') + ').'); });
+}
+function applyHostWorld(d){
+  const first = !NET.got; NET.got = true;
+  const keep = !first && P.placed ? P.pos.clone() : null;
+  stopTask(); clearMobs(); clearGround(); closePanels();
+  try { loadState(JSON.stringify(d)); } catch (e){ joinFailed('The world couldn’t be loaded.'); return; }
+  if (G.fresh){ delete G.fresh; applyStart(); }
+  refreshItems(); fitInv(); saveGame();
+  P.dirty = true; P.placed = false; spawnPlayer();
+  if (keep){ const c = nearestOk(keep.x, keep.z, 6, true); if (c) P.pos.copy(c); }
+  if (S.mode === 'play'){ syncMobs(); showGround(); }
+  updateCrops(true); updateThings(true);
+  const ov = $('#netOverlay'); if (ov) ov.remove();
+  document.title = `${NET.hostName}’s world · Pixelwright`;
+  renderTop(); renderSheet(); netSendPos();
+  toast(first ? `You arrive in ${NET.hostName}’s world.` : `${NET.hostName} updated the world.`); sfx('portal');
+}
+function ensurePlayer(id, name){
+  let pl = NET.players.get(id);
+  if (!pl){
+    const obj = makePlayer(false), parts = obj.userData.parts, h = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7), shirt = SHIRTS[h % SHIRTS.length];
+    if (tdef(shirt)) [parts.body, parts.armL, parts.armR].forEach(m => { m.material = [getMat(shirt)]; });
+    obj.traverse(o => { if (o.isMesh) o.userData = Object.assign({}, o.userData, { roles: ['player'], remote: id }); });
+    fxGroup.add(obj);
+    const tag = document.createElement('div'); tag.className = 'ntag'; $('#fx').appendChild(tag);
+    pl = { id, name: 'Player', obj, tag, tx: 0, ty: 0, tz: 0, tf: 0, moving: false, phase: 0, said: '', until: 0, muted: false, placed: false };
+    NET.players.set(id, pl);
+  }
+  if (name) pl.name = String(name).slice(0, 20);
+  return pl;
+}
+function removePlayer(id){ const pl = NET.players.get(id); if (!pl) return; fxGroup.remove(pl.obj); pl.tag.remove(); NET.players.delete(id); if (S.giveTo === id) S.giveTo = null; }
+function netLeft(id){
+  if (!NET.conns.has(id) && !NET.players.has(id)) return;
+  const pl = NET.players.get(id), nm = pl ? pl.name : 'Someone';
+  NET.conns.delete(id); removePlayer(id);
+  if (NET.role === 'host'){ netBroadcast({ t: 'left', id, n: nm }); addChat({ sys: true, text: `${nm} left.` }); }
+}
+function addChat(e){
+  if (e.id && NET.players.get(e.id) && NET.players.get(e.id).muted) return;
+  NET.chat.push(e); if (NET.chat.length > 40) NET.chat.shift();
+  const log = $('#chatLog'); if (log){ log.innerHTML = chatHtml(); log.scrollTop = log.scrollHeight; }
+  if (!e.sys){ const pl = e.id === 'me' ? NET.me : NET.players.get(e.id); if (pl){ pl.said = e.text; pl.until = performance.now() / 1000 + 6; } }
+  if (!(S.sheetOpen && S.gameTab === 'map' && S.mode === 'play')) toast(e.sys ? e.text : `${e.name}: ${e.text}`);
+}
+const chatHtml = () => NET.chat.map(e => e.sys ? `<div class="sys">${esc(e.text)}</div>` : `<div><b>${esc(e.name)}:</b> ${esc(e.text)}</div>`).join('') || '<div class="sys">No messages yet.</div>';
+function receiveGift(d, fromId){
+  if (!ITEMS[d.item]) return;
+  const n = Math.max(1, Math.min(100000, Math.round(+d.qty) || 1)), pl = NET.players.get(fromId), nm = pl ? pl.name : (d.n || 'Someone');
+  if (!addItem(d.item, n)) dropGround(d.item, P.pos, n, 300);
+  saveGame(); sfx('coin'); toast(`${nm} gave you ${n > 1 ? n + ' × ' : ''}${itemName(d.item).toLowerCase()}.`); renderSheet();
+}
+function giveSlot(i, n){
+  const pl = NET.players.get(S.giveTo), id = G.inv[i]; if (!pl || !id) { S.giveTo = null; renderSheet(); return; }
+  let k = 0; while (k < n && G.inv[i] === id){ takeOne(i); k++; }
+  netSend({ t: 'gift', to: pl.id, item: id, qty: k, n: myName() });
+  toast(`You give ${k > 1 ? k + ' × ' : 'the '}${itemName(id).toLowerCase()} to ${pl.name}.`); sfx('pick');
+  S.giveTo = null; saveGame(); renderSheet();
+}
+function netFelled(id){
+  const f = FELLED.get(id); if (!NET.role || !f || !f.at) return;
+  netSend({ t: 'felled', id, secs: Math.max(1, f.until - performance.now() / 1000), tex: f.tex || '', size: f.size || null, x: f.at.x, y: f.at.y, z: f.at.z });
+}
+function netData(d, from){
+  if (!d || typeof d !== 'object') return;
+  const host = NET.role === 'host', myId = NET.peer && NET.peer.id;
+  switch (d.t){
+    case 'world': if (!host && typeof d.doc === 'string'){ NET.hostName = String(d.host || 'Your friend').slice(0, 20); try { applyHostWorld(JSON.parse(d.doc)); } catch (e){ joinFailed('The world couldn’t be read.'); } } break;
+    case 'hello': if (host){ const pl = ensurePlayer(from, d.n); const msg = { t: 'chat', sys: true, text: `${pl.name} joined.` }; netBroadcast(msg, from); addChat(msg); sfx('portal'); renderSheet(); } break;
+    case 'pos': {
+      const id = host ? from : String(d.id || ''); if (!id || id === myId) break;
+      const pl = ensurePlayer(id, d.n), num = v => isFinite(+v) ? +v : 0;
+      pl.tx = num(d.x); pl.ty = num(d.y); pl.tz = num(d.z); pl.tf = num(d.f); pl.moving = !!d.m; pl.seen = performance.now() / 1000; pl.obj.visible = true;
+      if (!pl.placed){ pl.placed = true; pl.obj.position.set(pl.tx, pl.ty, pl.tz); }
+      if (host) netBroadcast(Object.assign({}, d, { id }), from);
+      break;
+    }
+    case 'chat': {
+      const id = host ? from : String(d.id || ''), text = String(d.text || '').slice(0, 140); if (!text) break;
+      if (d.sys && host) break; // only the host makes announcements
+      const pl = NET.players.get(id), name = d.sys ? '' : host ? (pl ? pl.name : 'Someone') : String(d.n || 'Someone').slice(0, 20);
+      if (host) netBroadcast({ t: 'chat', id, n: name, text }, from);
+      addChat({ id: d.sys ? '' : id, name, text, sys: !!d.sys }); break;
+    }
+    case 'gift': {
+      if (host && d.to !== myId){ const c = NET.conns.get(d.to); if (c) c.send(Object.assign({}, d, { from })); break; }
+      receiveGift(d, host ? from : String(d.from || '')); break;
+    }
+    case 'felled': {
+      if (host) netBroadcast(d, from);
+      const id = String(d.id || ''); if (!id || FELLED.has(id) || !objById.get(id)) break;
+      FELLED.set(id, { until: performance.now() / 1000 + Math.max(1, +d.secs || 30), stump: null, at: V(+d.x || 0, +d.y || 0, +d.z || 0), tex: d.tex || undefined, size: Array.isArray(d.size) ? d.size.slice(0, 3).map(Number) : undefined });
+      applyFelled(); if (P.task && (P.task.treeId === id || P.task.topId === id)) stopTask('Someone else got there first.');
+      break;
+    }
+    case 'fire': if (host) netBroadcast(d, from); if ([d.x, d.y, d.z].every(v => isFinite(+v))) spawnFire(V(+d.x, +d.y, +d.z)); break;
+    case 'bye': if (host) netLeft(from); break;
+    case 'left': if (!host){ const pl = NET.players.get(d.id); addChat({ sys: true, text: `${pl ? pl.name : String(d.n || 'Someone').slice(0, 20)} left.` }); removePlayer(d.id); } break;
+    case 'kick': if (!host){ NET.role = ''; joinFailed('The host removed you from their world.'); } break;
+    case 'end': if (!host){ NET.role = ''; joinFailed('The host stopped hosting.'); } break;
+    case 'full': if (!host) joinFailed(`That world is full (${NET_MAX} players).`); break;
+  }
+}
+// every frame: glide other players towards where they said they are, and keep name tags over their heads
+function netTick(dt){
+  if (!NET.role) return;
+  const play = S.mode === 'play' && S.ctx === 'world', t = performance.now() / 1000, k = Math.min(1, dt * 8);
+  NET.players.forEach(pl => {
+    const o = pl.obj, parts = o.userData.parts;
+    o.position.x += (pl.tx - o.position.x) * k; o.position.y += (pl.ty - o.position.y) * k; o.position.z += (pl.tz - o.position.z) * k;
+    let da = pl.tf - o.rotation.y; da = Math.atan2(Math.sin(da), Math.cos(da)); o.rotation.y += da * Math.min(1, dt * 10);
+    const moving = pl.moving || Math.hypot(pl.tx - o.position.x, pl.tz - o.position.z) > .05;
+    pl.phase = moving ? pl.phase + dt * 11 : 0; const sw = Math.sin(pl.phase) * (moving ? .6 : 0);
+    parts.legL.rotation.x = sw; parts.legR.rotation.x = -sw; parts.armL.rotation.x = -sw * .8; parts.armR.rotation.x = sw * .8;
+    if (pl.seen && t - pl.seen > 45) pl.obj.visible = false; // gone quiet (phone asleep?): hide them until they move again
+    const said = !S.hideChat && pl.until > t ? pl.said : '';
+    pl.tag.hidden = !play || !pl.obj.visible;
+    if (play){ const [x, y] = screenPos(o.position.clone().add(V(0, 1.75, 0))); pl.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = (said ? `<span class="say">${esc(said)}</span>` : '') + esc(pl.name); if (pl.tag._h !== html){ pl.tag._h = html; pl.tag.innerHTML = html; } }
+  });
+  const me = NET.me, mine = play && P.obj && !S.hideChat && me.until > t ? me.said : '';
+  if (mine){ if (!me.tag){ me.tag = document.createElement('div'); me.tag.className = 'ntag'; $('#fx').appendChild(me.tag); } const [x, y] = screenPos(P.pos.clone().add(V(0, 1.75 - (P.sink || 0), 0))); me.tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; const html = `<span class="say">${esc(mine)}</span>`; if (me.tag._h !== html){ me.tag._h = html; me.tag.innerHTML = html; } }
+  else if (me.tag){ me.tag.remove(); me.tag = null; }
+  if (!play || !P.obj) return;
+  NET.sendT += dt;
+  const moving = P.path.length > 0;
+  if ((moving && NET.sendT >= .12) || NET.sendT >= 2 || (NET.wasMoving && !moving)){ NET.sendT = 0; netSendPos(); }
+  NET.wasMoving = moving;
+}
+addEventListener('pagehide', () => { if (NET.role === 'guest') try { netSend({ t: 'bye' }); } catch (e){} else if (NET.role === 'host') try { netBroadcast({ t: 'end' }); } catch (e){} });
+function togetherPanel(){
+  if (!NET.role) return `<h3 class="sec">Play together</h3>
+    <p class="muted">Host this world and friends can join from their own phones with a code, or join someone else’s world. Each guest keeps their own skills and bag for each world they visit.</p>
+    ${NET.status ? `<p class="muted">${esc(NET.status)}</p>` : ''}
+    <div class="row"><button class="btn primary" data-act="net-host">Host this world</button><button class="btn" data-act="net-join">Join a world</button><button class="btn sm" data-act="net-name">Name: ${esc(myName())}</button></div>`;
+  const host = NET.role === 'host', others = [...NET.players.values()];
+  return `<h3 class="sec">${host ? 'Hosting this world' : `In ${esc(NET.hostName || 'a friend')}’s world`}</h3>
+    <div class="row"><span class="muted">Code</span><b style="font:700 20px 'Pixelify Sans',ui-monospace,monospace;letter-spacing:.12em">${esc(NET.code)}</b>${host ? '<button class="btn sm primary" data-act="net-invite">Invite</button><button class="btn sm" data-act="net-update">Send world update</button><button class="btn sm danger" data-act="net-stop">Stop hosting</button>' : '<button class="btn sm danger" data-act="net-leave">Leave</button>'}</div>
+    <ul class="pflist"><li><div class="meta"><b>${esc(myName())} (you)</b></div><button class="btn sm" data-act="net-name">Rename</button></li>${others.map(pl => `<li><div class="meta"><b>${esc(pl.name)}</b>${pl.muted ? '<span class="muted">Muted</span>' : ''}</div><div class="btns"><button class="btn sm" data-act="net-give" data-id="${esc(pl.id)}">Give</button><button class="btn sm${pl.muted ? ' on' : ''}" data-act="net-mute" data-id="${esc(pl.id)}">${pl.muted ? 'Unmute' : 'Mute'}</button>${host ? `<button class="btn sm danger" data-act="net-kick" data-id="${esc(pl.id)}">Remove</button>` : ''}</div></li>`).join('') || '<li class="muted">Nobody else here yet.</li>'}</ul>
+    <div id="chatLog" class="chatlog" aria-live="polite">${chatHtml()}</div>
+    <div class="row"><input id="chatIn" type="text" maxlength="140" placeholder="Say something…" value="${esc(S.chatDraft || '')}" aria-label="Chat message" autocomplete="off"><button class="btn primary" data-act="chat-send">Send</button><button class="btn sm${S.hideChat ? ' on' : ''}" data-act="chat-hide" aria-pressed="${!!S.hideChat}">Hide bubbles</button></div>`;
+}
+/* ---------- things: objects built from blocks ---------- */
+function comp(th, t){ return th && th.comps ? th.comps.find(c => c.t === t) || null : null; }
+var thingObjs = new Map(), thingTick = 0, plantLights = [], THING_ITEMS = [], auraT = new Map(), fruitGeo = null;
+const fruitMats = new Map();
+function useThing(i, id){
+  const th = doc.things[id], u = th && comp(th, 'use'); if (!u) return;
+  if (!condsOk(u.conds)){ toast(u.fail || 'You can’t use that right now.'); return; }
+  if (u.consume) takeOne(i);
+  runActions(u.actions);
+}
+const growStage = (st, def) => { const g = comp(def, 'grow'); if (!g || !st || !st.t) return 3; const f = (Date.now() - st.t) / (g.time * 1000); return f < .3 ? 0 : f < .65 ? 1 : f < 1 ? 2 : 3; };
+const growLeft = (st, def) => { const g = comp(def, 'grow'); return g && st && st.t ? Math.max(0, st.t + g.time * 1000 - Date.now()) / 1000 : 0; };
+// how many are ready to pick; production keeps going while the game is closed
+function stockOf(st, def){
+  const p = comp(def, 'produce'); if (!p || !st) return 0;
+  const now = Date.now(), every = p.every * 1000;
+  if (st.last == null){
+    const g = comp(def, 'grow');
+    if (g && st.t){ const ripe = st.t + g.time * 1000; if (now < ripe) return 0; st.last = ripe; st.stock = Math.min(p.max, p.n); }
+    else { st.last = now; st.stock = p.max; } // things placed in the world start full
+  }
+  if (now < st.last) st.last = now;
+  const k = Math.floor((now - st.last) / every);
+  if (k > 0){ st.stock = Math.min(p.max, (st.stock || 0) + k * p.n); st.last = st.stock >= p.max ? now : st.last + k * every; }
+  return st.stock || 0;
+}
+const nextIn = (st, def) => { const p = comp(def, 'produce'); return !p || !st || st.last == null ? growLeft(st, def) : Math.max(0, st.last + p.every * 1000 - Date.now()) / 1000; };
+function thingByKey(key, planted){
+  if (planted){ const st = G.plants[key], def = st && doc.things[st.thing]; return def ? { key, planted: true, st, def, tp: V(st.x, st.y ?? heightAt(st.x, st.z), st.z), boxKey: 'plant:' + key } : null; }
+  const it = doc.world.items.find(i => i.id === key); if (!it || !it.thing || !doc.things[it.thing]) return null;
+  if (!G.things[key]) G.things[key] = {};
+  return { key, planted: false, st: G.things[key], def: doc.things[it.thing], it, tp: V(it.pos[0], it.pos[1], it.pos[2]), boxKey: 'thing:' + key };
+}
+function thingAt(h){
+  const tid = h && h.ud && h.ud.topId; if (!tid || S.ctx !== 'world') return null;
+  return String(tid).startsWith('plant:') ? thingByKey(String(tid).slice(6), true) : thingByKey(tid, false);
+}
+function thingInteractions(th){
+  const { def, st } = th, nm = def.name, opts = [], ex = { thingKey: th.key, planted: th.planted };
+  const dig = th.planted ? [{ id: 'digup', label: 'Dig it up', menu: true, extra: ex }] : [];
+  if (growStage(st, def) < 3) return { opts: dig, note: `The ${nm.toLowerCase()} is still growing (about ${fmtTime(growLeft(st, def))} left).`, title: nm, tp: th.tp };
+  let note = '';
+  const p = comp(def, 'produce');
+  if (p && ITEMS[p.item]){ const n = stockOf(st, def); if (n > 0) opts.push({ id: 'thingpick', label: `${p.verb} ${itemName(p.item).toLowerCase()} (${n})`, extra: ex }); else note = `Nothing to ${p.verb.toLowerCase()} yet. More in about ${fmtTime(nextIn(st, def))}.`; }
+  const t = comp(def, 'tap'); if (t){ if (condsOk(t.conds)) opts.push({ id: 'thingtap', label: t.label, extra: ex }); else if (!note) note = t.fail || 'Nothing happens.'; }
+  if (comp(def, 'storage')) opts.push({ id: 'open', label: `Open the ${nm.toLowerCase()}`, extra: { box: th.boxKey, name: nm } });
+  const sc = comp(def, 'station'); if (sc && doc.stations[sc.id]) opts.push({ id: 'bench', label: `Use the ${nm.toLowerCase()}`, extra: { station: sc.id } });
+  return { opts: opts.concat(dig), note: opts.length ? '' : note, title: nm, tp: th.tp };
+}
+function plantHere(i, tid){
+  const def = doc.things[tid], g = def && comp(def, 'grow'); if (!g) return;
+  if (g.soil){ toast(`Plant the ${def.name.toLowerCase()} in tilled soil: tap the soil.`); return; }
+  if (lv('farming') < g.lvl){ toast(`You need Farming level ${g.lvl} to plant that.`); return; }
+  if ((P.sink || 0) > .3){ toast('You can’t plant in water.'); return; }
+  if (Object.values(G.plants).some(pl => Math.hypot(pl.x - P.pos.x, pl.z - P.pos.z) < .9)){ toast('Too close to another plant.'); return; }
+  takeOne(i); G.plants['p' + uid()] = { thing: tid, t: Date.now(), x: P.pos.x, y: P.pos.y, z: P.pos.z };
+  gainXp('farming', g.xp); saveGame(); stepAside(); updateThings(true);
+  toast(`You plant the ${def.name.toLowerCase()}. It’ll be ready in about ${fmtTime(g.time)}.`);
+}
+function fruitMat(id, lit){
+  const key = id + (lit ? '*' : ''); let m = fruitMats.get(key);
+  if (!m){ const it = ITEMS[id], c = it && it.icon && tdef(it.icon) ? texColor(it.icon).map(v => Math.min(255, v * 1.5)) : [210, 60, 60]; m = new THREE.MeshLambertMaterial({ color: new THREE.Color(c[0] / 255, c[1] / 255, c[2] / 255) }); if (lit && m.emissive) m.emissive.setRGB(c[0] / 400, c[1] / 400, c[2] / 400); fruitMats.set(key, m); }
+  return m;
+}
+function addFruit(group, def, n, box, topId){
+  const p = comp(def, 'produce'); if (!p || !n) return;
+  if (!fruitGeo) fruitGeo = new THREE.SphereGeometry(.09, 6, 5);
+  const cx = (box.min.x + box.max.x) / 2, cz = (box.min.z + box.max.z) / 2, w = Math.max(.25, (box.max.x - box.min.x) / 2), h = Math.max(.3, box.max.y - box.min.y);
+  for (let k = 0; k < n; k++){
+    const a = k * 2.399, r = w * (.78 + .18 * ((k * .618) % 1)), y = box.min.y + h * (.35 + .5 * ((k * .37 + .2) % 1));
+    const m = new THREE.Mesh(fruitGeo, fruitMat(p.item, !!comp(def, 'light'))); m.position.set(cx + Math.cos(a) * r, y, cz + Math.sin(a) * r);
+    m.castShadow = true; m.userData = { roles: ['fruit'], topId }; group.add(m);
+  }
+}
+function dropThingObj(k){ const o = thingObjs.get(k); if (o){ fxGroup.remove(o.obj); thingObjs.delete(k); } }
+// planted things grow from small to full; anything that produces shows what's ready to pick
+function updateThings(force){
+  const now = performance.now(); if (!force && now - thingTick < 1000) return; thingTick = now;
+  THING_ITEMS = doc.world.items.filter(i => i.thing && doc.things[i.thing]);
+  const want = new Map(); plantLights = [];
+  if (S.ctx === 'world'){
+    for (const [key, st] of Object.entries(G.plants)){
+      const def = doc.things[st.thing]; if (!def) continue;
+      const stage = growStage(st, def), n = stage >= 3 ? stockOf(st, def) : 0, pos = V(st.x, st.y ?? heightAt(st.x, st.z), st.z);
+      want.set('plant:' + key, { def, st, planted: true, pos, sig: stage + '|' + n, stage, n });
+      if (stage >= 3 && comp(def, 'light')) plantLights.push(pos.clone().add(V(0, .8, 0)));
+    }
+    for (const it of THING_ITEMS){
+      const def = doc.things[it.thing]; if (!comp(def, 'produce')) continue;
+      if (!G.things[it.id]) G.things[it.id] = {};
+      const n = stockOf(G.things[it.id], def), o3 = objById.get(it.id);
+      want.set(it.id, { def, planted: false, it, sig: n + '|' + it.pos.join(',') + '|' + (o3 ? o3.id : ''), n });
+    }
+  }
+  [...thingObjs.keys()].forEach(k => { const w = want.get(k); if (!w || force || thingObjs.get(k).sig !== w.sig) dropThingObj(k); });
+  want.forEach((w, k) => {
+    if (thingObjs.has(k)) return;
+    const root = new THREE.Group();
+    if (w.planted){
+      const b = comp(w.def, 'body'), model = b && doc.prefabs[b.model] ? b.model : null;
+      const body = model ? buildObj({ id: k, kind: 'prefab', ref: model, pos: [0, 0, 0], rot: 0 }, { topId: k, prefabId: null, depth: 0, stack: [] }) : part(.3, .35, .3, 'sprouts', 0);
+      if (!model) body.userData = { roles: ['sprout'], topId: k };
+      body.scale.setScalar([.3, .5, .75, 1][w.stage]); body.position.copy(w.pos); root.add(body);
+      if (w.n){ body.updateMatrixWorld(true); addFruit(root, w.def, w.n, new THREE.Box3().setFromObject(body), k); }
+    } else {
+      const o3 = objById.get(w.it.id); if (!o3) return;
+      o3.updateMatrixWorld(true); addFruit(root, w.def, w.n, new THREE.Box3().setFromObject(o3), w.it.id);
+    }
+    fxGroup.add(root); thingObjs.set(k, { obj: root, sig: w.sig });
+  });
+}
+// auras: standing near a thing with an Aura block runs its actions every so often
+function updateAuras(dt){
+  if (!P.obj) return;
+  const near = (key, a, x, z) => {
+    if (Math.hypot(P.pos.x - x, P.pos.z - z) > a.radius){ auraT.delete(key); return; }
+    const t = (auraT.get(key) || 0) + dt; if (t < a.every){ auraT.set(key, t); return; }
+    auraT.set(key, 0); if (condsOk(a.conds)) runActions(a.actions, true);
+  };
+  for (const it of THING_ITEMS){ const a = comp(doc.things[it.thing], 'aura'); if (a) near(it.id, a, it.pos[0], it.pos[2]); }
+  for (const [key, st] of Object.entries(G.plants)){ const def = doc.things[st.thing], a = def && comp(def, 'aura'); if (a && growStage(st, def) >= 3) near('plant:' + key, a, st.x, st.z); }
 }
 function closePanels(){ endTalk(); S.box = S.craft = S.shop = S.bank = null; }
 // the bank: one shared store of unlimited stacks
@@ -6281,7 +6882,7 @@ function applyStart(){
 async function newGame(){
   if (!await dialog({ title: 'Start a new game?', msg: 'Skills, bag, quests, crops and chests start over. The world you built stays as it is.', okLabel: 'Start over' })) return;
   stopTask(); closePanels(); clearGround();
-  Object.assign(G, { style: 'accurate', crops: {}, ground: [], boxes: {}, quests: {}, dayT: .35 });
+  Object.assign(G, { style: 'accurate', plants: {}, things: {}, crops: {}, ground: [], boxes: {}, quests: {}, dayT: .35 });
   SKILLS.forEach(([k]) => { G.xp[k] = k === 'hitpoints' ? 1154 : 0; }); G.vars = {}; G.done = {};
   applyStart(); saveGame();
   P.placed = false; P.path = []; spawnPlayer(); syncMobs(); updateCrops(true); renderSheet(); toast('A new adventure begins.');
@@ -6325,8 +6926,8 @@ function walkTap(h, x, y){
   const { opts, title, tp, extra, note } = interactions(h);
   if (note) toast(note);
   if (!opts.length){ stopTask(); walkTo(h); return; }
-  const run = o => () => { if (o.id === 'swim'){ stopTask(); walkTo(h); } else if (o.id === 'attack') startFight(extra.mob); else startTask(o.id, tp, o.extra || extra); };
-  if (opts.length === 1){ run(opts[0])(); return; }
+  const run = o => () => { if (o.now){ o.now(); return; } if (o.id === 'swim'){ stopTask(); walkTo(h); } else if (o.id === 'attack') startFight(extra.mob); else startTask(o.id, tp, o.extra || extra); };
+  if (opts.length === 1 && !opts[0].menu){ run(opts[0])(); return; }
   showMenu(x, y, title, opts.map(o => ({ label: o.label, run: run(o) })).concat([{ label: 'Walk here', run: () => { stopTask(); walkTo(h); } }]));
 }
 function startTask(type, at, extra){
@@ -6341,6 +6942,8 @@ function startTask(type, at, extra){
   if (type === 'chop' && freeSlot() < 0 && !G.inv.includes('logs')){ toast('Your inventory is too full to hold any logs.'); return; }
   if (type === 'fish' && !toolPower('fishing')){ toast('You need a fishing net.'); return; }
   if (type === 'cook' && !G.inv.some(isRaw)){ toast('You have nothing to cook. Catch fish, or make bread dough.'); return; }
+  if (type === 'plantthing'){ const g2 = comp(doc.things[extra.thing], 'grow'); if (!g2 || !G.inv.includes(g2.seed)){ toast('You have no seeds for that.'); return; } if (lv('farming') < g2.lvl){ toast(`You need Farming level ${g2.lvl} to plant that.`); return; } }
+  if (type === 'thingpick'){ const th = thingByKey(extra.thingKey, extra.planted), pc = th && comp(th.def, 'produce'); if (pc && freeSlot() < 0 && !(stackable(pc.item) && G.inv.includes(pc.item))){ toast('Your bag is full.'); return; } }
   if (type === 'plant'){ const cd = doc.crops[extra.crop]; if (!cd || !G.inv.includes(cd.seed)){ toast('You have no seeds for that.'); return; } if (lv('farming') < cd.lvl){ toast(`You need Farming level ${cd.lvl} to plant that.`); return; } }
   if (type === 'harvest' && freeSlot() < 0){ toast('Your inventory is too full to hold any grain.'); return; }
   if (type === 'grind' && !G.inv.includes('grain')){ toast('You have no grain to grind.'); return; }
@@ -6404,7 +7007,7 @@ function taskTick(T, dt){
       for (const [id, n] of gives) if (!addItem(id, n)){ stopTask('Your bag is full.'); return; }
       gainXp(r.skill, r.xp); saveGame(); fireRules('gather', T.res);
       toast(gives.length ? `You get ${gives.map(([id, n]) => (n > 1 ? n + ' × ' : '') + ITEMS[id].name.toLowerCase()).join(' and ')}.` : 'Nothing comes of it.');
-      if (T.topId && Math.random() < r.deplete){ sfx(r.tool === 'mining' ? 'crumble' : 'fall'); FELLED.set(T.topId, { until: performance.now() / 1000 + r.respawn, stump: null, at: T.tp.clone(), tex: 'stone', size: [.7, .12, .7] }); applyFelled(); stopTask(); return; }
+      if (T.topId && Math.random() < r.deplete){ sfx(r.tool === 'mining' ? 'crumble' : 'fall'); FELLED.set(T.topId, { until: performance.now() / 1000 + r.respawn, stump: null, at: T.tp.clone(), tex: 'stone', size: [.7, .12, .7] }); applyFelled(); netFelled(T.type === 'chop' ? T.treeId : T.topId); stopTask(); return; }
       if (freeSlot() < 0 && !gives.every(([id]) => stackable(id))){ stopTask(); setTimeout(() => toast('Your bag is full.'), 900); } else renderSheet();
     }
   } else if (T.type === 'chop'){
@@ -6414,7 +7017,7 @@ function taskTick(T, dt){
     if (Math.random() < Math.min(.92, .35 + L * .02 + (toolPower('woodcutting') - 1) * .08)){
       if (!addItem('logs')){ stopTask('Your inventory is full.'); return; }
       gainXp('woodcutting', 25); saveGame(); toast('You get some logs.'); fireRules('gather', 'tree');
-      if (Math.random() < .35){ sfx('fall'); FELLED.set(T.treeId, { until: performance.now() / 1000 + 30, stump: null, at: T.tp.clone() }); applyFelled(); stopTask(); setTimeout(() => toast('The tree falls. A new one will grow there soon.'), 900); return; }
+      if (Math.random() < .35){ sfx('fall'); FELLED.set(T.treeId, { until: performance.now() / 1000 + 30, stump: null, at: T.tp.clone() }); applyFelled(); netFelled(T.type === 'chop' ? T.treeId : T.topId); stopTask(); setTimeout(() => toast('The tree falls. A new one will grow there soon.'), 900); return; }
       if (freeSlot() < 0 && !G.inv.includes('logs')){ stopTask(); setTimeout(() => toast('Your inventory is full.'), 900); } else renderSheet();
     }
   } else if (T.type === 'light'){
@@ -6422,7 +7025,7 @@ function taskTick(T, dt){
     if (Math.random() < Math.min(.95, .45 + levelOf(G.xp.firemaking) * .02)){
       const li = G.inv[T.slot] === 'logs' ? T.slot : G.inv.indexOf('logs');
       if (li < 0){ stopTask(); return; }
-      takeOne(li); spawnFire(P.pos.clone()); gainXp('firemaking', 40); saveGame();
+      takeOne(li); spawnFire(P.pos.clone()); netSend({ t: 'fire', x: +P.pos.x.toFixed(2), y: +P.pos.y.toFixed(2), z: +P.pos.z.toFixed(2) }); gainXp('firemaking', 40); saveGame();
       stopTask('The fire catches and the logs begin to burn.');
       stepAside();
     }
@@ -6452,6 +7055,26 @@ function taskTick(T, dt){
     const dest = doc.world.items.find(i => i.kind === 'portal' && i.opt && i.opt.name === T.to);
     if (!dest) stopTask(`Nothing answers on the other side. (No portal is named ${T.to}.)`);
     else teleportTo(V(dest.pos[0], 0, dest.pos[2] + 1.6), `You step through to ${T.to}.`);
+  } else if (T.type === 'plantthing'){
+    if (T.t < 1) return;
+    const def = doc.things[T.thing], g = def && comp(def, 'grow'), k = g ? G.inv.indexOf(g.seed) : -1; if (k < 0){ stopTask(); return; }
+    takeOne(k); const at = tileCenter(T.tile); G.plants['tile:' + T.tile] = { thing: T.thing, t: Date.now(), x: at.x, y: at.y, z: at.z };
+    gainXp('farming', g.xp); saveGame(); updateThings(true);
+    stopTask(`You plant the ${def.name.toLowerCase()}. It’ll be ready in about ${fmtTime(g.time)}.`);
+  } else if (T.type === 'thingpick'){
+    if (T.t < 1) return; T.t = 0;
+    const th = thingByKey(T.thingKey, T.planted), pc = th && comp(th.def, 'produce'); if (!pc || !ITEMS[pc.item]){ stopTask(); return; }
+    if (stockOf(th.st, th.def) <= 0){ stopTask(`You’ve picked it clean.`); updateThings(true); return; }
+    if (!addItem(pc.item)){ stopTask('Your bag is full.'); return; }
+    if (th.st.stock >= pc.max) th.st.last = Date.now(); // production restarts once there's room
+    th.st.stock--; gainXp(pc.skill, pc.xp); saveGame(); sfx('pick'); fireRules('gather', th.planted ? th.st.thing : th.it.thing);
+    toast(`You ${pc.verb.toLowerCase()} ${itemName(pc.item).toLowerCase()}.`); updateThings(true); renderSheet();
+  } else if (T.type === 'thingtap'){
+    stopTask(); const th = thingByKey(T.thingKey, T.planted), tc = th && comp(th.def, 'tap'); if (!tc) return;
+    if (condsOk(tc.conds)) runActions(tc.actions); else toast(tc.fail || 'Nothing happens.');
+  } else if (T.type === 'digup'){
+    stopTask(); const st = G.plants[T.thingKey]; if (!st) return; const nm = (doc.things[st.thing] || { name: 'plant' }).name;
+    delete G.plants[T.thingKey]; saveGame(); updateThings(true); toast(`You dig up the ${nm.toLowerCase()}.`);
   } else if (T.type === 'rule'){
     stopTask(); const r = doc.rules.find(x => x.id === T.rule); if (r) ruleAct(r);
   } else if (T.type === 'bank'){
@@ -6543,7 +7166,7 @@ function updatePlayer(dt){
     if (!(inG(ci, cj) && g.ok[cj * g.W + ci])){ const c = nearestOk(P.pos.x, P.pos.z, Infinity, true); if (c) P.pos.copy(c); toast('You drift gently back down.'); } else P.pos.y = g.H[cj * g.W + ci];
   }
   P.wasFlying = flying;
-  let budget = (swimming ? 2 : flying ? 4.2 : 3.2) * dt, moving = false;
+  let budget = (swimming ? 2 : flying ? 4.2 : 3.2) * dt * Math.max(.3, 1 + buffBonus('speed') / 100), moving = false;
   while (P.path.length && budget > 0){
     const tgt = P.path[0], dx = tgt.x - P.pos.x, dz = tgt.z - P.pos.z, dist = Math.hypot(dx, dz);
     if (dist > 1e-4) P.facing = Math.atan2(dx, dz);
@@ -6640,7 +7263,9 @@ function loop(t){
   if (landDirty){ landDirty = false; const base = terrainBase(); dirtyChunks.forEach(k => { const [ci, cj] = k.split(',').map(Number); makeChunk(ci, cj, base); }); dirtyChunks.clear(); }
   if (FELLED.size) regrow(secs);
   if (FIRES.length) burnOut(secs);
-  updateCrops(false);
+  updateCrops(false); updateThings(false);
+  if (S.mode === 'play' && S.ctx === 'world') updateAuras(dt);
+  if (NET.role) netTick(dt);
   if (SHAKES.length || CHIPS.length) updateShakes(dt);
   updateWeather(dt);
   if (S.mode === 'play' && S.sheetOpen && S.gameTab === 'map'){ mapT += dt; if (mapT > .5){ mapT = 0; const mc = $('#mapCv'); if (mc) drawMap(mc); } }
@@ -6669,7 +7294,7 @@ if (vv){ vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll
 parsePal();
 texEntry('__missing');
 makeGround(true); rebuild(); resize(); renderSheet(); renderTop();
-if (G.fresh){ delete G.fresh; applyStart(); saveGame(); } // a brand-new player gets the starting kit
+if (G.fresh && !JOIN){ delete G.fresh; applyStart(); saveGame(); } // a brand-new player gets the starting kit (guests get it once the world arrives)
 fitInv();
 if (!G.beltDone){ // older saves: move tools out of the bag onto the belt, once
   G.beltDone = true;
@@ -6689,11 +7314,12 @@ if (!doc.world.core && !S.worldOffered){ // older saves never saw the wider worl
 }
 if (S.startPlay) setTimeout(() => setMode('play'), 50);
 { const ic = $('link[rel="icon"]'), bi = $('#brandIcon'); if (ic && bi) bi.src = ic.href; }
-if (!GAME && !localStorage.getItem(PKEY + '.guided')){ localStorage.setItem(PKEY + '.guided', '1'); setTimeout(() => toast('New here? Tap ? for the guide on making your game.'), 2600); }
+if (!GAME && !JOIN && !localStorage.getItem(PKEY + '.guided')){ localStorage.setItem(PKEY + '.guided', '1'); setTimeout(() => toast('New here? Tap ? for the guide on making your game.'), 2600); }
 // installed as a home-screen app (GitHub Pages): keep working offline
 if (!GAME && 'serviceWorker' in navigator && location.protocol === 'https:' && !/claude|anthropic/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 sun.castShadow = S.shadows;
-if (GAME){ // the title screen of an exported game
+if (JOIN) setTimeout(() => joinScreen(), 30);
+if (GAME && !JOIN){ // the title screen of an exported game
   const ts = document.createElement('div'); ts.id = 'titleScreen';
   ts.innerHTML = `<div><h1>${esc(GAME.title || 'Pixelwright')}</h1><p>Made with Pixelwright</p><div class="row"><button class="btn primary" data-ts="play">Play</button><button class="btn" data-ts="new">New game</button></div></div>`;
   ts.addEventListener('click', e => { const b = e.target.closest('[data-ts]'); if (!b) return; audioInit(); ts.remove(); if (b.dataset.ts === 'new') setTimeout(() => newGame(), 200); });

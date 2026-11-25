@@ -8,3 +8,6 @@ A pixel-art 3D world builder and game maker that runs in the browser.
 3. Open the address GitHub shows. On iPhone, tap Share → Add to Home Screen to install it with its icon. It keeps working offline after the first visit.
 
 Your worlds save in the browser on each device. Use Create → Game → World → Back up world to keep a copy.
+
+## Play together
+Hosting uses free player-to-player connections (WebRTC through the public PeerJS server), so there is no server to run. The host's app must stay open. Guests open `?join=CODE` on your Pages address, or tap Map → Join a world and type the code.
